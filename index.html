@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>1–16 數字卡加總挑戰</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF; --dot:rgba(2,128,144,.13); --panel:#F3F8F9; --paper:#FFFFFF;
+  --ink:#12343B; --muted:#4F676D; --rule:#D5E4E6;
+  --orange:#E8552D; --orange-soft:#FFF0EA; --amber:#F4A93C; --amber-soft:#FFE7BF;
+  --teal:#028090; --teal-dark:#016270; --teal-soft:#E0F1F3;
+  --rail:#D7E7EA; --slot:#9CC4CA;
+  --num:"Baloo 2", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --zh:"Noto Sans TC", "Microsoft JhengHei", "PingFang TC", "Heiti TC", system-ui, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F2428; --dot:rgba(120,200,210,.10); --panel:#16323A; --paper:#1C3B43;
+    --ink:#EAF4F5; --muted:#A9C3C8; --rule:#2B4D55; --orange-soft:#3A2620; --amber-soft:#43381F;
+    --teal-soft:#123F46; --rail:#2B4D55; --slot:#4C7C84;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F2428; --dot:rgba(120,200,210,.10); --panel:#16323A; --paper:#1C3B43;
+  --ink:#EAF4F5; --muted:#A9C3C8; --rule:#2B4D55; --orange-soft:#3A2620; --amber-soft:#43381F;
+  --teal-soft:#123F46; --rail:#2B4D55; --slot:#4C7C84;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);overflow-x:hidden;height:100%}
+body{
+  margin:0; min-height:100%; overflow-x:hidden; color:var(--ink); font-family:var(--zh); font-size:18px; line-height:1.6;
+  background-color:var(--bg);
+  background-image:radial-gradient(var(--dot) 1.6px, transparent 1.7px);
+  background-size:26px 26px;
+}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,.card:focus-visible,.slot:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 18px 40px}
+
+/* ---------- header ---------- */
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:6px 0 18px}
+.brandmark{display:flex;align-items:center;gap:14px}
+.logo-cards{display:flex;gap:4px}
+.logo-cards span{display:grid;place-items:center;width:40px;height:46px;border:3px solid var(--ink);border-radius:9px;background:var(--paper);
+  font:800 24px/1 var(--num);box-shadow:0 4px 0 var(--ink)}
+.logo-cards span:nth-child(1){transform:rotate(-8deg);background:var(--amber)}
+.logo-cards span:nth-child(2){transform:translateY(-4px)}
+.logo-cards span:nth-child(3){transform:rotate(7deg);background:var(--teal);color:#fff}
+h1{margin:0;font-weight:900;font-size:clamp(26px,4.4vw,40px);letter-spacing:.02em;line-height:1.2}
+.sub{margin:4px 0 0;color:var(--muted);font-size:clamp(16px,2.2vw,19px)}
+.solved-count{font-weight:700;color:var(--muted);font-size:17px}
+.solved-count b{font:800 26px/1 var(--num);color:var(--orange)}
+
+/* ---------- setup ---------- */
+.setup{background:var(--paper);border:3px solid var(--ink);border-radius:22px;padding:18px;box-shadow:0 6px 0 var(--ink);margin-bottom:26px}
+.setup h2{font-size:19px;margin:0 0 10px;font-weight:900}
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.mode{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px 10px;border:2.5px solid var(--rule);border-radius:16px;background:var(--paper);text-align:center;min-width:0;transition:transform .12s}
+.mode:hover{transform:translateY(-2px)}
+.mode svg{width:64px;height:54px}
+.mode .mname{font-weight:900;font-size:18px;line-height:1.25}
+.mode .minfo{font-size:14.5px;color:var(--muted);line-height:1.3}
+.mode[aria-pressed="true"]{border-color:var(--orange);background:var(--orange-soft);box-shadow:0 4px 0 var(--orange)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px 20px}
+.opt label.ol{display:block;font-weight:900;font-size:17px;margin-bottom:6px}
+.seg{display:flex;border:2.5px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--paper)}
+.seg button{flex:1;border:0;background:transparent;padding:9px 4px;font-weight:700;font-size:17px;min-width:0;white-space:nowrap}
+.seg button+button{border-left:2px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
+.optnote{font-size:15px;color:var(--muted);margin-top:5px;line-height:1.45;min-height:1.45em}
+.stepper{display:flex;align-items:center;gap:8px;margin-top:8px}
+.stepper button{width:46px;height:46px;border-radius:12px;border:2.5px solid var(--ink);background:var(--paper);font:800 26px/1 var(--num)}
+.stepper output{min-width:64px;text-align:center;font:800 34px/1 var(--num);color:var(--orange)}
+.stepper.off{opacity:.35;pointer-events:none}
+.toggles{display:flex;flex-direction:column;gap:8px}
+.tg{display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;font-weight:700;font-size:17px;text-align:left}
+.tg .sw{flex:none;width:52px;height:30px;border-radius:30px;background:var(--rule);position:relative;transition:background .15s}
+.tg .sw::after{content:"";position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
+.tg[aria-checked="true"] .sw{background:var(--teal)}
+.tg[aria-checked="true"] .sw::after{left:26px}
+
+/* ---------- play ---------- */
+.play{background:var(--paper);border:3px solid var(--ink);border-radius:26px;box-shadow:0 6px 0 var(--ink);padding:18px 16px 20px;position:relative}
+.task{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 14px;text-align:center;margin:0 0 6px}
+.task .rule{font-weight:900;font-size:clamp(20px,3vw,30px);line-height:1.35}
+.target{display:inline-grid;place-items:center;min-width:1.7em;padding:0 .25em;height:1.5em;border-radius:.35em;background:var(--orange);color:#fff;
+  font:800 clamp(38px,6vw,64px)/1 var(--num);box-shadow:0 5px 0 #A93716;transform:rotate(-3deg)}
+.status{text-align:center;font-weight:700;font-size:clamp(17px,2.2vw,21px);color:var(--muted);min-height:1.6em;margin:4px 0 2px}
+.status.good{color:var(--teal)}
+.status.warn{color:var(--orange)}
+.board-wrap{position:relative;display:flex;justify-content:center;align-items:center;margin:4px 0 10px}
+.board{position:relative}
+.board svg.rails{position:absolute;inset:0;overflow:visible;pointer-events:none}
+.rails line{stroke:var(--rail);stroke-linecap:round;transition:stroke .25s}
+.rails line.ok{stroke:var(--teal);opacity:.55}
+.rails line.bad{stroke:var(--orange);opacity:.45}
+
+.slot{position:absolute;border-radius:18%;border:3px dashed var(--slot);background:rgba(2,128,144,.05);display:grid;place-items:center;transform:translate(-50%,-50%)}
+.slot.empty::after{content:"";width:22%;height:22%;border-radius:50%;background:var(--slot);opacity:.45}
+.slot.target-hover{border-color:var(--orange);background:var(--orange-soft);border-style:solid}
+.slot.wanted{animation:wanted 1s ease-in-out infinite}
+@keyframes wanted{50%{border-color:var(--orange);background:var(--orange-soft)}}
+.slot>.card{position:absolute;inset:-3px;width:auto;height:auto}
+
+.card{display:grid;place-items:center;border:3px solid var(--ink);border-radius:18%;background:var(--paper);color:var(--ink);
+  font-family:var(--num);font-weight:800;line-height:1;box-shadow:0 5px 0 var(--ink);user-select:none;-webkit-user-select:none;touch-action:none;
+  transition:transform .12s, background .12s, box-shadow .12s;position:relative}
+.card span{transform:translateY(.06em)}
+.card.fixed{background:var(--teal);border-color:var(--teal-dark);color:#fff;box-shadow:0 5px 0 var(--teal-dark);cursor:default}
+.card.fixed::before{content:"";position:absolute;top:8%;right:8%;width:13%;height:13%;border-radius:50%;background:#fff;opacity:.8}
+.card.reveal{background:var(--amber-soft);border-color:#B87410;box-shadow:0 5px 0 #B87410}
+.card.sel{background:var(--amber);transform:translateY(-8px);box-shadow:0 11px 0 var(--ink)}
+.card.pop{animation:pop .28s ease-out}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+.card.dragging{opacity:.25}
+.ghost{position:fixed;z-index:50;pointer-events:none;transform:translate(-50%,-50%) rotate(-4deg) scale(1.08);box-shadow:0 14px 22px rgba(18,52,59,.28)}
+
+.bubble{position:absolute;transform:translate(-50%,-50%);min-width:2.1em;height:2.1em;padding:0 .35em;border-radius:1.05em;display:grid;place-items:center;
+  border:2.5px solid var(--rule);background:var(--paper);color:var(--muted);font:800 1em/1 var(--num);transition:background .2s,color .2s,border-color .2s}
+.bubble.part{border-color:var(--ink);color:var(--ink)}
+.bubble.ok{background:var(--teal);border-color:var(--teal);color:#fff}
+.bubble.bad{background:var(--orange);border-color:var(--orange);color:#fff}
+.bubble.hidden{visibility:hidden}
+.bubble.flash{animation:flash .5s ease-out}
+.bubble.shake{animation:shake .45s ease-in-out}
+@keyframes flash{0%{transform:translate(-50%,-50%) scale(1.45)}100%{transform:translate(-50%,-50%) scale(1)}}
+@keyframes shake{20%,60%{transform:translate(-62%,-50%)}40%,80%{transform:translate(-38%,-50%)}}
+.center-target{position:absolute;transform:translate(-50%,-50%);display:grid;place-items:center;text-align:center;color:var(--orange);
+  font:800 1em/1 var(--num);opacity:.9}
+.center-target small{display:block;font:900 .3em/1.2 var(--zh);color:var(--muted);margin-bottom:.12em}
+.plus{position:absolute;transform:translate(-50%,-50%);font:800 1em/1 var(--num);color:var(--muted)}
+
+.hand-label{text-align:center;font-weight:900;font-size:17px;color:var(--muted);margin:6px 0 8px}
+.hand{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 12px;padding:12px;border-radius:20px;background:var(--panel);min-height:96px;border:2.5px solid transparent;transition:border-color .15s,background .15s}
+.hand.target-hover{border-color:var(--orange);background:var(--orange-soft)}
+.hand .card{width:var(--hc,74px);height:var(--hc,74px);font-size:calc(var(--hc,74px)*.52);cursor:grab}
+.hand-empty{align-self:center;color:var(--muted);font-weight:700;font-size:16px}
+
+.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:16px}
+.btn{border:3px solid var(--ink);border-radius:14px;background:var(--paper);padding:10px 18px;font-weight:900;font-size:18px;box-shadow:0 4px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.primary{background:var(--orange);color:#fff;border-color:#A93716;box-shadow:0 4px 0 #A93716}
+.btn.teal{background:var(--teal);color:#fff;border-color:var(--teal-dark);box-shadow:0 4px 0 var(--teal-dark)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.win{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);opacity:0;pointer-events:none;z-index:20;
+  background:var(--paper);border:3px solid var(--ink);border-radius:24px;box-shadow:0 8px 0 var(--ink),0 20px 50px rgba(18,52,59,.25);padding:22px 28px;text-align:center;
+  transition:opacity .25s,transform .25s;width:min(92%,440px)}
+.win.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
+.win h3{margin:0 0 4px;font-size:clamp(28px,5vw,42px);font-weight:900;color:var(--teal)}
+.win p{margin:0 0 16px;font-size:19px;font-weight:700}
+.win .actions{margin-top:0}
+
+details.tips{margin-top:22px;background:var(--paper);border:2.5px solid var(--rule);border-radius:18px;padding:12px 18px}
+details.tips summary{font-weight:900;font-size:18px;cursor:pointer}
+details.tips p{margin:10px 0 0;font-size:17px}
+footer{text-align:center;color:var(--muted);font-size:15px;margin-top:28px}
+canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+
+.stage-bar{display:none}
+/* ---------- projection mode ---------- */
+body.stage{background-size:34px 34px}
+body.stage .wrap{max-width:none;padding:10px 14px;height:100%}
+body.stage header.top, body.stage .setup, body.stage details.tips, body.stage footer{display:none}
+body.stage .play{height:calc(100vh - 20px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;border-radius:20px;padding:10px 14px 12px}
+body.stage .board-wrap{flex:1;min-height:0;margin:0}
+body.stage .hand{min-height:0}
+body.stage .hand-label{display:none}
+body.stage .actions{margin-top:10px}
+body.stage .task .rule{font-size:clamp(24px,3.4vw,40px)}
+body.stage .target{font-size:clamp(46px,7vw,84px)}
+
+
+/* ---------- more games ---------- */
+.setup h2+.modes{margin-bottom:16px}
+#alt{display:flex;flex-direction:column;align-items:center;gap:14px;margin:8px 0 6px}
+body:not([data-kind="alt"]) #alt{display:none}
+body[data-kind="alt"] #boardWrap,body[data-kind="alt"] #handLabel,body[data-kind="alt"] #hand,body[data-kind="alt"] #bClear{display:none}
+.agrid{display:grid;justify-content:center}
+.agrid .card{width:var(--cs);height:var(--cs);font-size:calc(var(--cs)*.52);padding:0;cursor:pointer}
+.agrid .card.static{cursor:default}
+.card.done{background:var(--teal);border-color:var(--teal-dark);color:#fff;box-shadow:0 5px 0 var(--teal-dark)}
+.card.inplace{background:var(--teal-soft)}
+.card.dim{opacity:.2;cursor:default}
+.card.gone{visibility:hidden}
+.card.shake{animation:cshake .4s ease-in-out}
+@keyframes cshake{25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
+.card.wanted{animation:glow .9s ease-in-out 3}
+@keyframes glow{50%{background:var(--amber);transform:scale(1.08)}}
+.aslot{width:var(--cs);height:var(--cs);border:3px dashed var(--slot);border-radius:18%;background:rgba(2,128,144,.05)}
+.apad-label{font-weight:900;font-size:clamp(17px,2.2vw,22px);color:var(--muted)}
+.box{position:absolute;border:3px solid var(--ink);border-radius:22px;background:var(--panel)}
+.box .bl{position:absolute;left:0;right:0;top:0;transform:translateY(-55%);text-align:center}
+.box .bl span{display:inline-block;background:var(--amber);color:var(--ink);border:3px solid var(--ink);border-radius:12px;padding:.05em .6em;font-weight:900;line-height:1.4;white-space:nowrap}
+.slot .tag{font-family:var(--num);font-weight:800;color:var(--slot)}
+.slot.tagged::after{display:none}
+body.stage #alt{flex:1;min-height:0;justify-content:center;margin:0}
+
+@media (max-width:560px){
+  .wrap{padding:12px 10px 32px}
+  .setup{padding:14px 12px}
+  .modes{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .mode{padding:8px 4px}
+  .mode .mname{font-size:16px}
+  .mode .minfo{display:none}
+  .logo-cards{display:none}
+  .seg button{font-size:16px}
+  .play{padding:14px 8px 16px}
+  .btn{padding:9px 13px;font-size:17px}
+  .hand{gap:9px;padding:10px 6px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brandmark">
+      <div class="logo-cards" aria-hidden="true"><span>1</span><span>8</span><span>16</span></div>
+      <div>
+        <h1>1–16 數字卡加總挑戰</h1>
+        <p class="sub">把數字卡排進格子裡，讓每一條線加起來都一樣</p>
+      </div>
+    </div>
+    <div class="solved-count">已完成 <b id="solved">0</b> 題</div>
+  </header>
+
+  <section class="setup" aria-label="出題設定">
+    <h2>加總挑戰</h2>
+    <div class="modes" id="modes"></div>
+    <h2>更多玩法</h2>
+    <div class="modes" id="modes2"></div>
+    <div class="opts">
+      <div class="opt">
+        <label class="ol">難度</label>
+        <div class="seg" id="diffSeg">
+          <button data-v="easy">簡單</button><button data-v="mid">中等</button><button data-v="hard">困難</button>
+        </div>
+        <div class="optnote" id="diffNote"></div>
+      </div>
+      <div class="opt" id="optHand">
+        <label class="ol">手上的牌</label>
+        <div class="seg" id="handSeg">
+          <button data-v="exact">剛好夠用</button><button data-v="extra">多幾張</button><button data-v="all">剩下全部</button>
+        </div>
+        <div class="optnote" id="handNote"></div>
+      </div>
+      <div class="opt" id="optTgt">
+        <label class="ol">目標數字</label>
+        <div class="seg" id="tgtSeg">
+          <button data-v="random">隨機出題</button><button data-v="set">自己指定</button>
+        </div>
+        <div class="stepper off" id="stepper">
+          <button id="tMinus" aria-label="目標數字減少">−</button>
+          <output id="tVal">25</output>
+          <button id="tPlus" aria-label="目標數字增加">+</button>
+        </div>
+        <div class="optnote" id="tgtNote"></div>
+      </div>
+      <div class="opt toggles">
+        <label class="ol">輔助</label>
+        <button class="tg" id="tgSums" role="switch" aria-checked="true"><span class="sw"></span>顯示每條線目前的總和</button>
+        <button class="tg" id="tgSound" role="switch" aria-checked="true"><span class="sw"></span>音效</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="play" id="play" aria-label="遊戲區">
+    <div class="task"><span class="rule" id="ruleText"></span><span class="target" id="targetBadge">25</span></div>
+    <div class="status" id="status" aria-live="polite"></div>
+    <div class="board-wrap" id="boardWrap"><div class="board" id="board"></div></div>
+    <div id="alt"></div>
+    <div class="hand-label" id="handLabel">手上的數字卡（點一張，再點格子；也可以直接拖曳）</div>
+    <div class="hand" id="hand"></div>
+    <div class="actions">
+      <button class="btn primary" id="bGo" style="display:none">我記好了</button>
+      <button class="btn primary" id="bNext">下一題</button>
+      <button class="btn" id="bClear">全部收回</button>
+      <button class="btn" id="bHint">給我一張提示</button>
+      <button class="btn" id="bReveal">看答案</button>
+      <button class="btn teal" id="bStage">投影模式</button>
+    </div>
+    <div class="win" id="win" role="dialog" aria-modal="false" aria-labelledby="winTitle">
+      <h3 id="winTitle">完成了！</h3>
+      <p id="winText"></p>
+      <div class="actions">
+        <button class="btn primary" id="wNext">下一題</button>
+        <button class="btn" id="wStay">再看看</button>
+      </div>
+    </div>
+  </section>
+
+  <details class="tips">
+    <summary>帶領小撇步</summary>
+    <p id="tipText"></p>
+    <p>加總挑戰的手牌選「剩下全部」時，答案不只一種；只要每條線都對，系統就算完成。按「看答案」顯示的是其中一種排法，可以請大家比比看自己的排法哪裡不一樣。</p>
+    <p>投影時按「投影模式」，畫面只留題目、格子和手牌，字會放到最大；再按一次「離開投影」回到設定。</p>
+  </details>
+  <footer>愛迪樂健康促進團隊</footer>
+</div>
+<canvas id="fx"></canvas>
+
+<script>
+(() => {
+"use strict";
+/* ============ shape definitions (single source) ============ */
+const R3 = Math.sqrt(3) / 2;
+const range = (a, b) => { const r = []; for (let i = a; i < b; i++) r.push(i); return r; };
+
+function borderShape(n){
+  const s = [];
+  for (let i = 0; i < n; i++) s.push([i, 0]);
+  for (let i = 1; i < n; i++) s.push([n - 1, i]);
+  for (let i = n - 2; i >= 0; i--) s.push([i, n - 1]);
+  for (let i = n - 2; i >= 1; i--) s.push([0, i]);
+  const m = (n - 1) / 2, o = 1.0;
+  return {
+    slots: s.map(([x, y]) => ({x, y})),
+    lines: [
+      {cells: range(0, n), bx: m, by: -o, name: "上邊"},
+      {cells: range(n - 1, 2 * n - 1), bx: n - 1 + o, by: m, name: "右邊"},
+      {cells: range(2 * n - 2, 3 * n - 2), bx: m, by: n - 1 + o, name: "下邊"},
+      {cells: [...range(3 * n - 3, 4 * n - 4), 0], bx: -o, by: m, name: "左邊"}
+    ],
+    center: {x: m, y: m}
+  };
+}
+function crossShape(arm){
+  const c = arm, slots = [{x: c, y: c}], v = [], h = [];
+  for (let i = 0; i <= 2 * arm; i++) { if (i === c) continue; slots.push({x: c, y: i}); }
+  for (let i = 0; i <= 2 * arm; i++) { if (i === c) continue; slots.push({x: i, y: c}); }
+  slots.forEach((p, idx) => { if (p.x === c) v.push(idx); if (p.y === c) h.push(idx); });
+  v.sort((a, b) => slots[a].y - slots[b].y); h.sort((a, b) => slots[a].x - slots[b].x);
+  return { slots, lines: [
+    {cells: v, bx: c, by: 2 * arm + 1.0, name: "直的"},
+    {cells: h, bx: 2 * arm + 1.0, by: c, name: "橫的"}
+  ]};
+}
+function miShape(){
+  const pos = [[1,1],[0,0],[1,0],[2,0],[2,1],[2,2],[1,2],[0,2],[0,1]];
+  const slots = pos.map(([x, y]) => ({x, y}));
+  const at = (x, y) => slots.findIndex(p => p.x === x && p.y === y);
+  return { slots, lines: [
+    {cells: [at(0,1), at(1,1), at(2,1)], bx: 3.0, by: 1, name: "橫線"},
+    {cells: [at(1,0), at(1,1), at(1,2)], bx: 1, by: 3.0, name: "直線"},
+    {cells: [at(0,0), at(1,1), at(2,2)], bx: 2.9, by: 2.9, name: "斜線"},
+    {cells: [at(2,0), at(1,1), at(0,2)], bx: -0.9, by: 2.9, name: "斜線"}
+  ]};
+}
+function triShape(n){
+  const g = 1.14, L = (n - 1) * g;
+  const A = {x: L / 2, y: 0}, B = {x: 0, y: L * R3}, C = {x: L, y: L * R3};
+  const lerp = (p, q, t) => ({x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t});
+  const slots = [];
+  const side = (P, Q) => { const idx = []; for (let k = 0; k < n - 1; k++) { slots.push(lerp(P, Q, k / (n - 1))); idx.push(slots.length - 1); } return idx; };
+  const s1 = side(A, B), s2 = side(B, C), s3 = side(C, A);
+  const cen = {x: L / 2, y: L * R3 * 2 / 3};
+  const bub = (P, Q) => { const m = lerp(P, Q, .5); const dx = m.x - cen.x, dy = m.y - cen.y, d = Math.hypot(dx, dy); return {bx: m.x + dx / d * 0.98, by: m.y + dy / d * 0.98}; };
+  return { slots, lines: [
+    {cells: [...s1, s2[0]], ...bub(A, B), name: "左邊"},
+    {cells: [...s2, s3[0]], ...bub(B, C), name: "底邊"},
+    {cells: [...s3, s1[0]], ...bub(C, A), name: "右邊"}
+  ]};
+}
+function magicShape(n){
+  const slots = []; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) slots.push({x, y});
+  const id = (x, y) => y * n + x, lines = [];
+  for (let y = 0; y < n; y++) lines.push({cells: range(0, n).map(x => id(x, y)), bx: n - 1 + 1.0, by: y, name: "第" + (y + 1) + "橫排"});
+  for (let x = 0; x < n; x++) lines.push({cells: range(0, n).map(y => id(x, y)), bx: x, by: n - 1 + 1.0, name: "第" + (x + 1) + "直行"});
+  lines.push({cells: range(0, n).map(i => id(i, i)), bx: n - 1 + .92, by: n - 1 + .92, name: "斜線"});
+  lines.push({cells: range(0, n).map(i => id(n - 1 - i, i)), bx: -.92, by: n - 1 + .92, name: "斜線"});
+  return {slots, lines};
+}
+function sumShape(k){
+  const gap = 1.42, slots = range(0, k).map(i => ({x: i * gap, y: 0}));
+  const plus = range(0, k - 1).map(i => ({x: (i + .5) * gap, y: 0}));
+  return { slots, plus, lines: [{cells: range(0, k), bx: (k - 1) * gap + 1.05, by: 0, name: "總和", eq: true}]};
+}
+
+const SHAPES = [
+  {id: "sq3", name: "正方形 3×3", info: "8 張，每邊 3 張", build: () => borderShape(3),
+    rule: "上下左右每一邊 3 張加起來都是",
+    tip: "四個角的卡會同時算在兩條邊裡，先決定四個角，中間那張就是「目標減掉兩個角」。"},
+  {id: "sq4", name: "正方形 4×4", info: "12 張，每邊 4 張", build: () => borderShape(4),
+    rule: "上下左右每一邊 4 張加起來都是",
+    tip: "先放四個角，每一邊就只剩中間兩張要湊出「目標減掉兩個角」，可以請學員說出還差多少。"},
+  {id: "cross5", name: "十字", info: "5 張，直 3 橫 3", build: () => crossShape(1),
+    rule: "直的 3 張、橫的 3 張加起來都是",
+    tip: "中間那張直的橫的都算到，所以上下兩張的和，會等於左右兩張的和。"},
+  {id: "cross9", name: "大十字", info: "9 張，直 5 橫 5", build: () => crossShape(2),
+    rule: "直的 5 張、橫的 5 張加起來都是",
+    tip: "中間那張共用；扣掉中間後，直的四張和橫的四張要湊成一樣多。"},
+  {id: "mi", name: "米字", info: "9 張，四條線過中心", build: () => miShape(),
+    rule: "橫的、直的、兩條斜線，每條 3 張都是",
+    tip: "四條線都經過中間那張，所以每一組「對面的兩張」加起來都要一樣。"},
+  {id: "tri3", name: "三角形", info: "6 張，每邊 3 張", build: () => triShape(3),
+    rule: "三角形每一邊 3 張加起來都是",
+    tip: "三個角各算兩次，角上放大的數字，邊上就要放小的數字來平衡。"},
+  {id: "tri4", name: "大三角形", info: "9 張，每邊 4 張", build: () => triShape(4),
+    rule: "三角形每一邊 4 張加起來都是",
+    tip: "先放三個角，每一邊就只要湊中間兩張。"},
+  {id: "magic3", name: "九宮格方陣", info: "9 張，橫直斜都一樣", build: () => magicShape(3),
+    rule: "每一橫排、每一直行、兩條斜線都是",
+    tip: "這種方陣中間那張，剛好是目標數字的三分之一；卡住時可以先提醒學員這一點。"},
+  {id: "magic4", name: "四乘四方陣", info: "1–16 全部用上", build: () => magicShape(4),
+    rule: "1 到 16 全部用上，橫排、直行、斜線都是",
+    tip: "1 到 16 加起來是 136，分成 4 排，每排一定是 34。可以先找「兩兩相加等於 17」的配對。"},
+  {id: "sum", name: "湊數字", info: "挑幾張剛好等於目標", build: null,
+    rule: "", tip: "先挑最大的一張，再算「還差多少」，最適合練習心算與減法。"}
+];
+const SUM_K = {easy: 2, mid: 3, hard: 4};
+
+/* ============ solver ============ */
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+function solve(shape, S, pool, nodeLimit, tries){
+  const n = shape.slots.length, lineOf = shape.slots.map(() => []);
+  shape.lines.forEach((l, li) => l.cells.forEach(c => lineOf[c].push(li)));
+  const poolSet = new Set(pool);
+  for (let t = 0; t < tries; t++) {
+    const val = new Array(n).fill(0), used = new Set();
+    let nodes = 0, aborted = false;
+    const rec = i => {
+      if (++nodes > nodeLimit) { aborted = true; return false; }
+      if (i === n) return true;
+      let forced = null;
+      for (const li of lineOf[i]) {
+        let sum = 0, empty = 0;
+        for (const c of shape.lines[li].cells) { if (c === i) continue; if (val[c]) sum += val[c]; else empty++; }
+        if (empty === 0) { const need = S - sum; if (forced === null) forced = need; else if (forced !== need) return false; }
+      }
+      const cands = forced !== null ? [forced] : shuffle(pool.slice());
+      for (const v of cands) {
+        if (!poolSet.has(v) || used.has(v)) continue;
+        let ok = true;
+        for (const li of lineOf[i]) {
+          let sum = v, empty = 0;
+          for (const c of shape.lines[li].cells) { if (c === i) continue; if (val[c]) sum += val[c]; else empty++; }
+          const rem = S - sum;
+          if (rem < empty * (empty + 1) / 2 || rem > empty * 16 - empty * (empty - 1) / 2) { ok = false; break; }
+        }
+        if (!ok) continue;
+        val[i] = v; used.add(v);
+        if (rec(i + 1)) return true;
+        val[i] = 0; used.delete(v);
+        if (aborted) return false;
+      }
+      return false;
+    };
+    if (rec(0)) return val;
+  }
+  return null;
+}
+const ALL16 = range(1, 17);
+const feasCache = {};
+function feasibleTargets(key, shape){
+  if (feasCache[key]) return feasCache[key];
+  let list = [];
+  if (key === "magic4") list = [34];
+  else {
+    const L = Math.max(...shape.lines.map(l => l.cells.length));
+    const lo = L * (L + 1) / 2, hi = L * 16 - L * (L - 1) / 2;
+    for (let S = lo; S <= hi; S++) if (solve(shape, S, ALL16, 6000, 4)) list.push(S);
+  }
+  return (feasCache[key] = list);
+}
+
+/* ============ more games: definitions ============ */
+const ICON = {
+  sq: (x, y, s, t, fill, dash) => `<rect x="${x}" y="${y}" width="${s}" height="${s}" rx="${s * .22}" fill="${fill || "#fff"}" stroke="${dash ? "#9CC4CA" : "#12343B"}" stroke-width="1.8"${dash ? ' stroke-dasharray="3 2"' : ""}/>` + (t ? `<text x="${x + s / 2}" y="${y + s * .74}" font-size="${s * .62}" font-weight="800" text-anchor="middle" fill="${fill && fill !== "#fff" ? "#fff" : "#12343B"}" font-family="sans-serif">${t}</text>` : ""),
+  wrap: s => `<svg viewBox="0 0 64 54" aria-hidden="true">${s}</svg>`
+};
+function gridIcon(vals, opts = {}){
+  let s = ""; const z = 15, g = 2, ox = 32 - (3 * z + 2 * g) / 2, oy = 27 - (3 * z + 2 * g) / 2;
+  vals.forEach((v, k) => { const x = ox + (k % 3) * (z + g), y = oy + Math.floor(k / 3) * (z + g);
+    s += v === 0 ? ICON.sq(x, y, z, "", "none", true) : ICON.sq(x, y, z, v === "?" ? "?" : String(v), (opts.teal || []).includes(k) ? "#028090" : "#fff"); });
+  return ICON.wrap(s);
+}
+const MORE = [
+  {id: "schulte", kind: "alt", name: "找數字方格", info: "依序點 1 到 16",
+    icon: () => gridIcon([7, 2, 5, 1, 9, 4, 6, 3, 8], {teal: [3, 1]}),
+    diff: {easy: "3×3，從 1 點到 9", mid: "4×4，從 1 點到 16", hard: "4×4，從 16 倒著點到 1"},
+    tip: "練注意力與搜尋速度。團體時可以請大家一起喊出下一個數字，由一位代表上台點；也可以比比看第二次有沒有比第一次快。"},
+  {id: "slide", kind: "alt", name: "數字華容道", info: "滑動排回順序",
+    icon: () => gridIcon([1, 2, 3, 4, 6, 0, 7, 5, 8]),
+    diff: {easy: "3×3，只打亂幾步", mid: "3×3，打亂比較多", hard: "4×4，1 到 15"},
+    tip: "練計畫與空間推理。點空格同一排或同一直行的卡，中間的卡會一起滑過去。卡住時，先把第一排排好，再處理下面。"},
+  {id: "memory", kind: "place", name: "看一眼再排回去", info: "記住位置再排回",
+    icon: () => gridIcon([0, 8, 0, 3, 0, 0, 0, 0, 12], {teal: [1, 3, 8]}),
+    diff: {easy: "記 3 張卡", mid: "記 5 張卡", hard: "記 7 張卡"},
+    tip: "練視覺記憶。看的時候可以請學員把位置說出來，例如「8 在最上面中間」，用說的會記得更牢。"},
+  {id: "sort", kind: "place", name: "排排隊", info: "依照大小排好",
+    icon: () => ICON.wrap(ICON.sq(2, 20, 13, "2") + ICON.sq(17, 20, 13, "5") + ICON.sq(32, 20, 13, "9") + ICON.sq(47, 20, 13, "", "none", true) + `<path d="M6 42 H56 M50 37 L56 42 L50 47" stroke="#F4A93C" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`),
+    diff: {easy: "5 張，由小到大", mid: "8 張，由小到大或由大到小", hard: "只挑單數或雙數來排"},
+    tip: "練數序與比較大小。困難版手上會混著用不到的卡，要先挑出符合規則的卡再排。"},
+  {id: "classify", kind: "place", name: "分一分", info: "放進對的籃子",
+    icon: () => ICON.wrap(`<rect x="2" y="10" width="27" height="38" rx="7" fill="#F3F8F9" stroke="#12343B" stroke-width="1.8"/><rect x="35" y="10" width="27" height="38" rx="7" fill="#F3F8F9" stroke="#12343B" stroke-width="1.8"/>` + ICON.sq(8, 16, 13, "3") + ICON.sq(8, 31, 13, "7") + ICON.sq(42, 16, 13, "4") + ICON.sq(42, 31, 13, "", "none", true)),
+    diff: {easy: "單數、雙數", mid: "大於 8、8 或更小", hard: "3 的倍數、不是 3 的倍數"},
+    tip: "練分類與規則判斷。每個籃子的格子數就是那一類的張數，放不下時就代表有卡放錯了。"},
+  {id: "missing", kind: "alt", name: "缺了哪一張", info: "找出不見的數字",
+    icon: () => ICON.wrap(ICON.sq(2, 20, 13, "1") + ICON.sq(17, 20, 13, "2") + ICON.sq(32, 20, 13, "", "none", true) + ICON.sq(47, 20, 13, "4")),
+    diff: {easy: "1 到 9，照順序，少 1 張", mid: "1 到 12，打亂，少 1 張", hard: "1 到 16，打亂，少 2 張"},
+    tip: "練注意力與數序。可以先請學員說說找的方法，例如從小到大一張一張點名，比亂找更快也更準。"},
+  {id: "guess", kind: "alt", name: "猜數字", info: "大一點還是小一點",
+    icon: () => ICON.wrap(ICON.sq(18, 8, 28, "?") + `<text x="7" y="32" font-size="16" font-weight="800" fill="#F4A93C" font-family="sans-serif">‹</text><text x="51" y="32" font-size="16" font-weight="800" fill="#F4A93C" font-family="sans-serif">›</text>`),
+    diff: {easy: "1 到 8", mid: "1 到 16", hard: "1 到 16，最多猜 5 次"},
+    tip: "練推理與策略。玩幾次後可以問大家：猜哪一張最快縮小範圍？每次猜中間那張，16 張最多 5 次一定猜得到。"},
+  {id: "pairs", kind: "alt", name: "湊對消除", info: "兩張湊成目標",
+    icon: () => ICON.wrap(ICON.sq(6, 16, 20, "8", "#F4A93C") + ICON.sq(38, 16, 20, "9", "#F4A93C") + `<path d="M16 14 Q32 0 48 14" stroke="#028090" stroke-width="2.5" fill="none" stroke-linecap="round"/>`),
+    diff: {easy: "1 到 8，兩張湊成 9", mid: "1 到 16，兩張湊成 17", hard: "目標隨機，6 對"},
+    tip: "練心算與配對。先點一張，再想「還差多少」去找另一張；找到的一對會消失，畫面越來越乾淨。"}
+];
+SHAPES.forEach(s => s.kind = "line");
+const ALLMODES = SHAPES.concat(MORE);
+
+/* ============ state ============ */
+const st = {mode: "sq3", diff: "easy", hand: "exact", tgt: "random", setT: 25, sums: true, sound: true, solved: 0};
+try { Object.assign(st, JSON.parse(localStorage.getItem("numcard16") || "{}")); } catch (e) {}
+if (!ALLMODES.some(m => m.id === st.mode)) st.mode = "sq3";
+const save = () => { try { localStorage.setItem("numcard16", JSON.stringify(st)); } catch (e) {} };
+let P = null;           // current puzzle (engine) or {kind:'alt'}
+let G = null;           // current alt game
+let sel = null;
+let lastPlaced = -1;
+const timers = [];
+const stopTimers = () => { while (timers.length) { const t = timers.pop(); clearInterval(t); clearTimeout(t); } };
+
+const $ = id => document.getElementById(id);
+const modeDef = () => ALLMODES.find(s => s.id === st.mode);
+function currentShape(){
+  const d = modeDef();
+  return d.id === "sum" ? sumShape(SUM_K[st.diff]) : d.build();
+}
+const feasKey = () => st.mode === "sum" ? "sum" + SUM_K[st.diff] : st.mode;
+function hintCount(n){
+  if (st.mode === "sum") return 0;
+  if (st.mode === "magic4") return {easy: 8, mid: 5, hard: 2}[st.diff];
+  return {easy: Math.ceil(n / 2), mid: Math.max(1, Math.floor(n / 4)), hard: 0}[st.diff];
+}
+const isStage = () => document.body.classList.contains("stage");
+function setRule(t){ $("ruleText").textContent = t; }
+function setBadge(v){ const b = $("targetBadge"); if (v === null || v === undefined) b.style.display = "none"; else { b.style.display = ""; b.textContent = v; } }
+function setStatus(t, cls){ const s = $("status"); s.textContent = t; s.className = "status" + (cls ? " " + cls : ""); }
+function setButtons(o){
+  $("bHint").disabled = !o.hint; $("bReveal").disabled = !o.reveal;
+  const go = $("bGo"); go.style.display = o.go ? "" : "none"; if (o.go) go.textContent = o.go;
+}
+
+/* ============ new round dispatcher ============ */
+function newPuzzle(){
+  stopTimers(); hideWin(); sel = null; lastPlaced = -1; G = null;
+  const d = modeDef();
+  document.body.dataset.kind = d.kind;
+  $("tipText").textContent = d.tip;
+  if (d.kind === "line") { newLinePuzzle(); setButtons({hint: 1, reveal: 1}); }
+  else if (d.kind === "place") PLACE[d.id]();
+  else { P = {kind: "alt", done: false}; G = ALT[d.id]; setButtons({hint: !!G.hint, reveal: !!G.reveal}); G.start(); }
+}
+function newLinePuzzle(){
+  const shape = currentShape();
+  const feas = feasibleTargets(feasKey(), shape);
+  let S, sol = null;
+  if (st.tgt === "set") {
+    S = nearestFeasible(st.setT, feas); st.setT = S;
+    sol = solve(shape, S, ALL16, 60000, 40);
+  } else {
+    for (let k = 0; k < 30 && !sol; k++) { S = feas[Math.random() * feas.length | 0]; sol = solve(shape, S, ALL16, 60000, 10); }
+  }
+  if (!sol) { S = feas[0]; sol = solve(shape, S, ALL16, 200000, 60); }
+  const n = shape.slots.length;
+  const fixed = new Set(shuffle(range(0, n)).slice(0, hintCount(n)));
+  const board = new Array(n).fill(0);
+  fixed.forEach(i => board[i] = sol[i]);
+  const need = sol.filter((v, i) => !fixed.has(i));
+  const unused = shuffle(ALL16.filter(v => !sol.includes(v)));
+  let hand;
+  if (st.mode === "sum") {
+    const extra = st.hand === "all" ? null : (st.hand === "extra" ? 5 : 3);
+    hand = extra === null ? ALL16.slice() : need.concat(unused.slice(0, extra));
+  } else if (st.hand === "all") hand = ALL16.slice();
+  else if (st.hand === "extra") hand = need.concat(unused.slice(0, 3));
+  else hand = need.slice();
+  hand = hand.filter(v => !board.includes(v)).sort((a, b) => a - b);
+  P = {kind: "line", shape, S, sol, fixed, board, hand, revealed: new Set(), done: false, prevOk: new Set()};
+  renderAll();
+  const d = modeDef();
+  setRule(d.id === "sum" ? `挑 ${SUM_K[st.diff]} 張卡，加起來剛好是` : d.rule);
+  setBadge(P.S);
+  setStatus(st.mode === "sum" ? "從手上的牌挑 " + SUM_K[st.diff] + " 張" : (fixed.size ? "藍綠色的卡已經放好了，把其他格子補滿" : "把手上的卡放進空格"), "");
+}
+function nearestFeasible(t, feas){
+  let best = feas[0];
+  for (const v of feas) if (Math.abs(v - t) < Math.abs(best - t)) best = v;
+  return best;
+}
+
+/* ============ placement games (use the card-placing engine) ============ */
+function placePuzzle(o){
+  P = Object.assign({kind: "place", fixed: new Set(), revealed: new Set(), done: false, prevOk: new Set(), locked: false, keepOrder: false}, o);
+  setButtons({hint: 1, reveal: 1, go: o.go});
+  renderAll();
+}
+const PLACE = {
+  memory(){
+    const n = {easy: 3, mid: 5, hard: 7}[st.diff], secs = {easy: 10, mid: 12, hard: 15}[st.diff];
+    const slots = []; for (let y = 0; y < 3; y++) for (let x = 0; x < 3; x++) slots.push({x: x * 1.1, y: y * 1.1});
+    const nums = shuffle(ALL16.slice()).slice(0, n), pos = shuffle(range(0, 9)).slice(0, n);
+    const sol = new Array(9).fill(0); pos.forEach((p, k) => sol[p] = nums[k]);
+    placePuzzle({shape: {slots, lines: []}, sol, board: sol.slice(), hand: [], need: n, locked: true, go: "我記好了",
+      evalBad: () => range(0, 9).filter(i => P.board[i] && P.board[i] !== P.sol[i]),
+      winText: () => `${n} 張卡都回到原來的位置`, badMsg: k => `有 ${k} 張放錯位置，再想想看`, revealMsg: "這是剛才的位置"});
+    setRule(`記住這 ${n} 張卡放在哪裡`); setBadge(null);
+    let left = secs;
+    const tick = () => setStatus(`還有 ${left} 秒，看好了就按「我記好了」`, "");
+    tick();
+    timers.push(setInterval(() => { left--; if (left <= 0) memoryHide(); else tick(); }, 1000));
+  },
+  sort(){
+    let hand, need, asc = Math.random() < .5, rule;
+    if (st.diff === "easy") { asc = true; hand = shuffle(ALL16.slice()).slice(0, 5); need = hand.slice(); rule = "由小到大排好"; }
+    else if (st.diff === "mid") { hand = shuffle(ALL16.slice()).slice(0, 8); need = hand.slice(); rule = asc ? "由小到大排好" : "由大到小排好"; }
+    else {
+      const odd = Math.random() < .5;
+      do { hand = shuffle(ALL16.slice()).slice(0, 9); need = hand.filter(v => (v % 2 === 1) === odd); } while (need.length < 4 || need.length > 6);
+      rule = `只挑${odd ? "單數" : "雙數"}，${asc ? "由小到大" : "由大到小"}排好`;
+    }
+    const k = need.length, sol = need.slice().sort((a, b) => asc ? a - b : b - a);
+    const per = k <= 5 ? k : Math.ceil(k / 2);
+    const slots = range(0, k).map(i => ({x: (i % per) * 1.14, y: Math.floor(i / per) * 1.3}));
+    placePuzzle({shape: {slots, lines: [], tags: range(1, k + 1).map(String)}, sol, board: new Array(k).fill(0), hand: shuffle(hand.slice()), need: k, keepOrder: true,
+      evalBad: () => range(0, k).filter(i => P.board[i] !== P.sol[i]),
+      winText: () => sol.join(asc ? " < " : " > "), badMsg: c => `有 ${c} 張的位置不對，再比比看大小`, revealMsg: "這是正確的順序"});
+    setRule(rule); setBadge(null);
+    setStatus("照格子上的號碼，從第 1 格開始放", "");
+  },
+  classify(){
+    const R = {
+      easy: [["單數", v => v % 2 === 1], ["雙數", v => v % 2 === 0], 6],
+      mid: [["大於 8", v => v > 8], ["8 或更小", v => v <= 8], 8],
+      hard: [["3 的倍數", v => v % 3 === 0], ["不是 3 的倍數", v => v % 3 !== 0], 8]
+    }[st.diff];
+    let cards, A, B;
+    do { cards = shuffle(ALL16.slice()).slice(0, R[2]); A = cards.filter(R[0][1]).sort((a, b) => a - b); B = cards.filter(R[1][1]).sort((a, b) => a - b); } while (A.length < 2 || B.length < 2);
+    const rows = Math.ceil(Math.max(A.length, B.length) / 2), slots = [], group = [];
+    A.forEach((v, i) => { slots.push({x: (i % 2) * 1.1, y: Math.floor(i / 2) * 1.1}); group.push(0); });
+    B.forEach((v, i) => { slots.push({x: 3.3 + (i % 2) * 1.1, y: Math.floor(i / 2) * 1.1}); group.push(1); });
+    const boxH = (rows - 1) * 1.1;
+    const boxes = [{x0: -.68, y0: -.95, x1: 1.78, y1: boxH + .68, label: R[0][0]}, {x0: 2.62, y0: -.95, x1: 5.08, y1: boxH + .68, label: R[1][0]}];
+    const sol = A.concat(B), fns = [R[0][1], R[1][1]];
+    placePuzzle({shape: {slots, lines: [], boxes}, sol, board: new Array(sol.length).fill(0), hand: cards.slice().sort((a, b) => a - b), need: sol.length,
+      evalBad: () => range(0, sol.length).filter(i => P.board[i] && !fns[group[i]](P.board[i])),
+      winText: () => "每張卡都放進對的籃子", badMsg: c => `有 ${c} 張放錯籃子，再檢查看看`, revealMsg: "這是正確的分法",
+      hintFn: () => {
+        const wrong = range(0, sol.length).find(i => P.board[i] && !P.fixed.has(i) && !fns[group[i]](P.board[i]));
+        if (wrong !== undefined) { P.hand.push(P.board[wrong]); P.board[wrong] = 0; sortHand(); return "有一張放錯了，已經收回手上"; }
+        const v = P.hand[0]; if (v === undefined) return null;
+        const g = fns[0](v) ? 0 : 1;
+        const i = range(0, sol.length).find(k => group[k] === g && !P.board[k]);
+        if (i === undefined) return null;
+        P.hand = P.hand.filter(x => x !== v); P.board[i] = v; P.fixed.add(i); lastPlaced = i;
+        return `${v} 應該放在「${boxes[g].label}」`;
+      }});
+    setRule("把每張卡放進對的籃子"); setBadge(null);
+    setStatus(`左邊是「${R[0][0]}」，右邊是「${R[1][0]}」`, "");
+  }
+};
+function memoryHide(){
+  if (!P || P.kind !== "place" || !P.locked) return;
+  stopTimers();
+  P.hand = P.board.filter(v => v).sort((a, b) => a - b);
+  P.board = P.board.map(() => 0); P.locked = false;
+  setButtons({hint: 1, reveal: 1});
+  setRule("把卡片放回剛才的位置");
+  setStatus("點一張卡，再點它原本的格子", "");
+  sfx("back"); renderAll();
+}
+const sortHand = () => { if (!P.keepOrder) P.hand.sort((a, b) => a - b); };
+
+/* ============ engine rendering ============ */
+let unitPx = 80;
+function renderAll(){ renderBoard(); renderHand(); updateSums(false); }
+function bounds(shape){
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const add = (x, y, r) => { x0 = Math.min(x0, x - r); y0 = Math.min(y0, y - r); x1 = Math.max(x1, x + r); y1 = Math.max(y1, y + r); };
+  shape.slots.forEach(p => add(p.x, p.y, .5));
+  shape.lines.forEach(l => add(l.bx, l.by, .42));
+  (shape.boxes || []).forEach(b => { add(b.x0, b.y0 - .3, 0); add(b.x1, b.y1 + .1, 0); });
+  return {x0, y0, w: x1 - x0, h: y1 - y0};
+}
+function computeUnit(){
+  const b = bounds(P.shape), wrap = $("boardWrap");
+  const W = wrap.clientWidth - 8;
+  const H = isStage() ? wrap.clientHeight - 6 : Math.min(window.innerHeight * 0.62, 620);
+  const cap = isStage() ? 220 : 132;
+  unitPx = Math.max(34, Math.min(W / b.w, H / b.h, cap));
+  return b;
+}
+function renderBoard(){
+  if (!P || P.kind === "alt") return;
+  const b = computeUnit(), u = unitPx, sh = P.shape;
+  const board = $("board");
+  board.style.width = b.w * u + "px"; board.style.height = b.h * u + "px";
+  const X = x => (x - b.x0) * u, Y = y => (y - b.y0) * u;
+  const cs = u * .84;
+  let html = "";
+  (sh.boxes || []).forEach(bx => html += `<div class="box" style="left:${X(bx.x0)}px;top:${Y(bx.y0)}px;width:${(bx.x1 - bx.x0) * u}px;height:${(bx.y1 - bx.y0) * u}px"><div class="bl" style="font-size:${Math.max(15, u * .27)}px"><span>${bx.label}</span></div></div>`);
+  html += `<svg class="rails" width="${b.w * u}" height="${b.h * u}">`;
+  sh.lines.forEach((l, li) => {
+    if (l.eq) return;
+    const a = sh.slots[l.cells[0]], z = sh.slots[l.cells[l.cells.length - 1]];
+    html += `<line data-l="${li}" x1="${X(a.x)}" y1="${Y(a.y)}" x2="${X(z.x)}" y2="${Y(z.y)}" stroke-width="${u * (sh.slots.length >= 9 && sh.lines.length > 4 ? .11 : .2)}"/>`;
+  });
+  html += `</svg>`;
+  if (sh.center) html += `<div class="center-target" style="left:${X(sh.center.x)}px;top:${Y(sh.center.y)}px;font-size:${u * .6}px"><span><small>目標</small>${P.S}</span></div>`;
+  (sh.plus || []).forEach(p => html += `<div class="plus" style="left:${X(p.x)}px;top:${Y(p.y)}px;font-size:${u * .55}px">+</div>`);
+  sh.slots.forEach((p, i) => {
+    const v = P.board[i];
+    let inner = "";
+    if (v) {
+      const cls = ["card"];
+      if (P.fixed.has(i)) cls.push("fixed");
+      else if (P.revealed.has(i)) cls.push("reveal");
+      if (sel && sel.from === "slot" && sel.i === i) cls.push("sel");
+      if (i === lastPlaced) cls.push("pop");
+      inner = `<div class="${cls.join(" ")}" data-slot="${i}" style="font-size:${cs * .54}px" aria-label="數字 ${v}${P.fixed.has(i) ? "（提示卡）" : ""}"><span>${v}</span></div>`;
+    } else if (sh.tags) inner = `<span class="tag" style="font-size:${cs * .36}px">${sh.tags[i]}</span>`;
+    html += `<div class="slot${v ? "" : " empty"}${sh.tags ? " tagged" : ""}" data-slot-box="${i}" tabindex="${v ? -1 : 0}" role="button" aria-label="${v ? "格子：" + v : "空格"}" style="left:${X(p.x)}px;top:${Y(p.y)}px;width:${cs}px;height:${cs}px">${inner}</div>`;
+  });
+  sh.lines.forEach((l, li) => {
+    html += `<div class="bubble" data-b="${li}" style="left:${X(l.bx)}px;top:${Y(l.by)}px;font-size:${Math.max(15, u * .3)}px"></div>`;
+  });
+  board.innerHTML = html;
+  lastPlaced = -1;
+}
+function renderHand(){
+  if (!P || P.kind === "alt") return;
+  const h = $("hand");
+  const wrapW = h.clientWidth || 600;
+  let hc = Math.min(isStage() ? Math.max(60, unitPx * .7) : 84, unitPx * .84 + 6);
+  const n = P.hand.length;
+  if (isStage() && n > 0) {
+    const perRow = Math.max(1, Math.floor((wrapW - 20) / (hc + 12)));
+    if (Math.ceil(n / perRow) > 2) hc = Math.max(52, (wrapW - 20) / Math.ceil(n / 2) - 12);
+  }
+  hc = Math.max(52, Math.min(hc, (wrapW - 30) / 4 - 10));
+  h.style.setProperty("--hc", hc + "px");
+  if (!n) { h.innerHTML = `<div class="hand-empty">${P.locked ? "看好位置後，卡片會回到這裡" : "手上的牌都放完了"}</div>`; return; }
+  h.innerHTML = P.hand.map(v => `<div class="card${sel && sel.from === "hand" && sel.v === v ? " sel" : ""}" data-hand="${v}" tabindex="0" role="button" aria-label="手牌 ${v}"><span>${v}</span></div>`).join("");
+}
+function lineState(li){
+  const cells = P.shape.lines[li].cells;
+  let sum = 0, filled = 0;
+  cells.forEach(c => { if (P.board[c]) { sum += P.board[c]; filled++; } });
+  return {sum, filled, full: filled === cells.length};
+}
+function updateSums(react){
+  if (!P || P.kind === "alt") return;
+  const nowOk = new Set();
+  P.shape.lines.forEach((l, li) => {
+    const s = lineState(li), b = document.querySelector(`.bubble[data-b="${li}"]`), rail = document.querySelector(`.rails line[data-l="${li}"]`);
+    let cls = "bubble";
+    if (s.full && s.sum === P.S) { cls += " ok"; nowOk.add(li); }
+    else if (s.full) cls += " bad";
+    else if (s.filled) cls += " part";
+    const text = s.filled ? String(s.sum) : "?";
+    if (!st.sums && !(s.full && allFilled())) cls += " hidden";
+    if (b) { b.className = cls; b.textContent = text; b.setAttribute("aria-label", l.name + "目前 " + (s.filled ? s.sum : "沒有卡")); }
+    if (rail) rail.setAttribute("class", s.full ? (s.sum === P.S ? "ok" : "bad") : "");
+  });
+  if (react) {
+    let newOk = false;
+    nowOk.forEach(li => { if (!P.prevOk.has(li)) { newOk = true; const b = document.querySelector(`.bubble[data-b="${li}"]`); if (b && st.sums) { b.classList.remove("flash"); void b.offsetWidth; b.classList.add("flash"); } } });
+    if (newOk && !allFilled()) sfx("line");
+  }
+  P.prevOk = nowOk;
+}
+const allFilled = () => P.board.every(v => v);
+const placedCount = () => P.board.filter(v => v).length;
+const isComplete = () => P.kind === "place" ? placedCount() === P.need : allFilled();
+
+/* ============ engine moves ============ */
+function placeFromHand(v, i){
+  if (P.done || P.locked || P.fixed.has(i)) return;
+  const old = P.board[i];
+  P.hand = P.hand.filter(x => x !== v);
+  if (old) P.hand.push(old);
+  P.board[i] = v; P.revealed.delete(i);
+  sortHand();
+  lastPlaced = i; sel = null; sfx("place"); afterMove();
+}
+function moveSlot(i, j){
+  if (P.done || P.locked || P.fixed.has(i) || P.fixed.has(j) || i === j) return;
+  [P.board[i], P.board[j]] = [P.board[j], P.board[i]];
+  P.revealed.delete(i); P.revealed.delete(j);
+  lastPlaced = j; sel = null; sfx("place"); afterMove();
+}
+function returnSlot(i){
+  if (P.done || P.locked || P.fixed.has(i) || !P.board[i]) return;
+  P.hand.push(P.board[i]); sortHand();
+  P.board[i] = 0; P.revealed.delete(i); sel = null; sfx("back"); afterMove();
+}
+function afterMove(){ renderBoard(); renderHand(); updateSums(true); checkDone(); }
+function shakeSlots(list){
+  list.forEach(i => { const c = document.querySelector(`.card[data-slot="${i}"]`); if (c) { c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); } });
+}
+function checkDone(){
+  if (!isComplete()) {
+    if (P.kind === "place") setStatus(`還差 ${P.need - placedCount()} 張`, "");
+    else setStatus(`還有 ${P.board.filter(v => !v).length} 個空格`, "");
+    return;
+  }
+  if (P.kind === "place") {
+    const bad = P.evalBad();
+    if (!bad.length) win();
+    else { setStatus(P.badMsg(bad.length), "warn"); sfx("bad"); shakeSlots(bad); }
+    return;
+  }
+  const bad = P.shape.lines.map((l, i) => i).filter(li => lineState(li).sum !== P.S);
+  if (!bad.length) win();
+  else {
+    setStatus(`有 ${bad.length} 條線還不是 ${P.S}，換換看位置`, "warn");
+    sfx("bad");
+    bad.forEach(li => { const b = document.querySelector(`.bubble[data-b="${li}"]`); if (b) { b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); } });
+  }
+}
+function lineWinText(){ return st.mode === "sum" ? `${P.board.join(" + ")} = ${P.S}` : `每一條線都是 ${P.S}`; }
+function win(){
+  const text = P.kind === "place" ? P.winText() : lineWinText();
+  celebrate("完成了！", text);
+}
+function celebrate(title, text){
+  P.done = true; st.solved++; save(); $("solved").textContent = st.solved;
+  $("winTitle").textContent = title; $("winText").textContent = text;
+  setStatus(text, "good");
+  sfx("win"); confetti();
+  timers.push(setTimeout(() => $("win").classList.add("show"), 450));
+}
+function hideWin(){ $("win").classList.remove("show"); }
+
+function giveHint(){
+  if (P.done || P.locked) return;
+  if (P.hintFn) {
+    const msg = P.hintFn(); if (!msg) return;
+    sel = null; setStatus(msg, ""); sfx("place"); renderBoard(); renderHand(); updateSums(true);
+    if (isComplete()) checkDone();
+    return;
+  }
+  const cand = shuffle(range(0, P.board.length).filter(i => P.sol[i] && !P.fixed.has(i) && P.board[i] !== P.sol[i]));
+  if (!cand.length) return;
+  const i = cand[0], v = P.sol[i];
+  const j = P.board.indexOf(v);
+  if (j >= 0) { P.board[j] = 0; P.hand.push(v); }
+  if (P.board[i]) P.hand.push(P.board[i]);
+  P.board[i] = v; P.hand = P.hand.filter(x => x !== v); sortHand();
+  P.fixed.add(i); lastPlaced = i; sel = null;
+  setStatus("幫你放好一張了（藍綠色那張）", "");
+  sfx("place"); renderBoard(); renderHand(); updateSums(true);
+  if (isComplete()) checkDone();
+}
+function reveal(){
+  if (P.done || P.locked) return;
+  const pool = new Set(P.hand.concat(P.board.filter(v => v)));
+  P.board.forEach((v, i) => { if (!P.fixed.has(i) && P.sol[i]) P.revealed.add(i); });
+  P.board = P.sol.slice();
+  P.hand = [...pool].filter(v => !P.board.includes(v)); sortHand();
+  sel = null; renderBoard(); renderHand(); updateSums(false);
+  P.done = true;
+  if (P.kind === "place") setStatus(P.revealMsg, "good");
+  else setStatus(st.hand === "all" || st.mode === "sum" ? "這是其中一種排法，答案不只一種" : "這是其中一種排法", "good");
+}
+function clearBoard(){
+  if (!P || P.kind === "alt" || P.locked) return;
+  P.board.forEach((v, i) => { if (v && !P.fixed.has(i)) { P.hand.push(v); P.board[i] = 0; } });
+  P.revealed.clear(); P.done = false; hideWin();
+  sortHand(); sel = null; sfx("back");
+  renderBoard(); renderHand(); updateSums(false); setStatus("卡片都收回來了", "");
+}
+
+/* ============ pointer: tap & drag (engine) ============ */
+let drag = null;
+function onDown(e){
+  if (!P || P.kind === "alt") return;
+  const card = e.target.closest(".card");
+  const slotBox = e.target.closest("[data-slot-box]");
+  if (!card && slotBox) { tapSlot(+slotBox.dataset.slotBox); return; }
+  if (!card || P.done || P.locked) return;
+  const src = card.dataset.hand ? {from: "hand", v: +card.dataset.hand} : {from: "slot", i: +card.dataset.slot};
+  if (src.from === "slot" && P.fixed.has(src.i)) return;
+  drag = {src, card, x: e.clientX, y: e.clientY, moved: false, ghost: null, over: null};
+  e.preventDefault();
+}
+function onMove(e){
+  if (!drag) return;
+  if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return;
+  if (!drag.moved) {
+    drag.moved = true;
+    const r = drag.card.getBoundingClientRect();
+    const g = drag.card.cloneNode(true);
+    g.classList.remove("sel", "pop"); g.classList.add("ghost");
+    g.style.width = r.width + "px"; g.style.height = r.height + "px"; g.style.fontSize = getComputedStyle(drag.card).fontSize;
+    document.body.appendChild(g); drag.ghost = g; drag.card.classList.add("dragging");
+  }
+  drag.ghost.style.left = e.clientX + "px"; drag.ghost.style.top = e.clientY + "px";
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const over = el && (el.closest("[data-slot-box]") || el.closest("#hand"));
+  if (drag.over && drag.over !== over) drag.over.classList.remove("target-hover");
+  if (over && !(over.dataset.slotBox && P.fixed.has(+over.dataset.slotBox))) { over.classList.add("target-hover"); drag.over = over; } else drag.over = null;
+}
+function onUp(){
+  if (!drag) return;
+  const d = drag; drag = null;
+  if (d.over) d.over.classList.remove("target-hover");
+  if (d.ghost) d.ghost.remove();
+  d.card.classList.remove("dragging");
+  if (!d.moved) { tapCard(d.src); return; }
+  const o = d.over;
+  if (!o) return;
+  if (o.id === "hand") { if (d.src.from === "slot") returnSlot(d.src.i); return; }
+  const j = +o.dataset.slotBox;
+  if (d.src.from === "hand") placeFromHand(d.src.v, j); else moveSlot(d.src.i, j);
+}
+function tapCard(src){
+  ensureAudio();
+  if (src.from === "hand") {
+    sel = sel && sel.from === "hand" && sel.v === src.v ? null : src;
+    renderHand(); renderBoard(); updateSums(false);
+    if (sel) { setStatus(`拿起 ${src.v}，點一個格子放下去`, ""); markWanted(true); }
+    else markWanted(false);
+  } else {
+    if (sel && sel.from === "hand") { placeFromHand(sel.v, src.i); return; }
+    returnSlot(src.i);
+  }
+}
+function tapSlot(i){
+  ensureAudio();
+  if (P.done || P.locked || P.fixed.has(i)) return;
+  if (sel && sel.from === "hand") placeFromHand(sel.v, i);
+  else setStatus("先點一張手上的數字卡", "");
+}
+function markWanted(on){ document.querySelectorAll(".slot.empty").forEach(s => s.classList.toggle("wanted", on)); }
+document.addEventListener("pointerdown", e => { if (e.target.closest("#board,#hand")) onDown(e); });
+window.addEventListener("pointermove", onMove);
+window.addEventListener("pointerup", onUp);
+window.addEventListener("pointercancel", onUp);
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && isStage()) toggleStage();
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches("div.card,[data-slot-box]")) {
+    e.preventDefault();
+    const c = e.target;
+    if (c.dataset.hand) tapCard({from: "hand", v: +c.dataset.hand});
+    else if (c.dataset.slotBox) tapSlot(+c.dataset.slotBox);
+  }
+});
+
+/* ============ alt games (tap-only grids) ============ */
+const altEl = $("alt");
+function fitCard(cols, rows, reserve){
+  const W = altEl.clientWidth || 600, gap = Math.max(8, Math.min(16, W / 50));
+  const H = (isStage() ? altEl.clientHeight : Math.min(window.innerHeight * 0.62, 600)) - (reserve || 0);
+  const cap = isStage() ? 210 : 96;
+  const cs = Math.max(40, Math.min((W - gap * (cols - 1)) / cols, (H - gap * (rows - 1)) / rows, cap));
+  return {cs, gap};
+}
+function gridHTML(items, cols, size, extraCls){
+  return `<div class="agrid ${extraCls || ""}" style="grid-template-columns:repeat(${cols},${size.cs}px);gap:${size.gap}px;--cs:${size.cs}px">${items}</div>`;
+}
+const acard = (v, cls, attr) => `<button class="card ${cls || ""}" ${attr || `data-v="${v}"`} aria-label="數字 ${v}"><span>${v}</span></button>`;
+function jiggle(el){ if (!el) return; el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+function glow(el){ if (!el) return; el.classList.remove("wanted"); void el.offsetWidth; el.classList.add("wanted"); }
+altEl.addEventListener("click", e => {
+  ensureAudio();
+  const b = e.target.closest("[data-v],[data-ans]");
+  if (!b || !G || P.done) return;
+  if (b.dataset.ans) G.answer(+b.dataset.ans, b); else G.tap(+b.dataset.v, b);
+});
+
+const ALT = {
+  schulte: {
+    start(){
+      this.n = st.diff === "easy" ? 3 : 4; this.N = this.n * this.n;
+      this.vals = shuffle(range(1, this.N + 1)); this.desc = st.diff === "hard";
+      this.next = this.desc ? this.N : 1; this.t0 = 0; this.hit = new Set();
+      setRule(this.desc ? `從 ${this.N} 倒著點到 1，下一個是` : `從 1 依序點到 ${this.N}，下一個是`);
+      setBadge(this.next); setStatus("點下第一張就開始計時", ""); this.render();
+    },
+    render(){
+      const s = fitCard(this.n, this.n);
+      altEl.innerHTML = gridHTML(this.vals.map(v => acard(v, this.hit.has(v) ? "done" : "")).join(""), this.n, s);
+    },
+    tap(v, el){
+      if (this.hit.has(v)) return;
+      if (v !== this.next) { jiggle(el); sfx("bad"); return; }
+      if (!this.t0) { this.t0 = performance.now(); timers.push(setInterval(() => setStatus(`已經 ${((performance.now() - this.t0) / 1000).toFixed(1)} 秒`, ""), 100)); }
+      this.hit.add(v); el.classList.add("done", "pop"); sfx("place");
+      this.next += this.desc ? -1 : 1;
+      if (this.hit.size === this.N) { stopTimers(); const t = ((performance.now() - this.t0) / 1000).toFixed(1); setBadge("✓"); celebrate("完成了！", `${this.N} 張全部找到，花了 ${t} 秒`); }
+      else setBadge(this.next);
+    },
+    hint(){ glow(altEl.querySelector(`[data-v="${this.next}"]`)); setStatus(`${this.next} 在發亮的地方`, ""); }
+  },
+
+  slide: {
+    start(){
+      this.n = st.diff === "hard" ? 4 : 3; const N = this.n * this.n;
+      this.goal = range(1, N).concat([0]); this.t = this.goal.slice(); this.moves = 0;
+      const steps = {easy: 14, mid: 70, hard: 160}[st.diff]; let prev = -1;
+      do {
+        this.t = this.goal.slice(); prev = -1;
+        for (let k = 0; k < steps; k++) {
+          const e = this.t.indexOf(0), nb = this.nbrs(e).filter(x => x !== prev), p = nb[Math.random() * nb.length | 0];
+          [this.t[e], this.t[p]] = [this.t[p], this.t[e]]; prev = e;
+        }
+      } while (this.solved());
+      setRule(`把數字排回 1 到 ${N - 1} 的順序，空格留在最後`); setBadge(null);
+      setStatus("點空格同一排或同一直行的卡，卡就會滑過去", ""); this.render();
+    },
+    nbrs(i){ const n = this.n, x = i % n, y = Math.floor(i / n), r = []; if (x > 0) r.push(i - 1); if (x < n - 1) r.push(i + 1); if (y > 0) r.push(i - n); if (y < n - 1) r.push(i + n); return r; },
+    solved(){ return this.t.every((v, i) => v === this.goal[i]); },
+    render(){
+      const s = fitCard(this.n, this.n);
+      altEl.innerHTML = gridHTML(this.t.map((v, i) => v ? acard(v, v === i + 1 ? "inplace" : "") : `<div class="aslot"></div>`).join(""), this.n, s);
+    },
+    tap(v, el){
+      const n = this.n, i = this.t.indexOf(v), e = this.t.indexOf(0);
+      const sameRow = Math.floor(i / n) === Math.floor(e / n), sameCol = i % n === e % n;
+      if (!sameRow && !sameCol) { jiggle(el); sfx("bad"); return; }
+      const step = sameRow ? (i > e ? 1 : -1) : (i > e ? n : -n);
+      let cur = e; while (cur !== i) { this.t[cur] = this.t[cur + step]; cur += step; } this.t[i] = 0;
+      this.moves++; sfx("place"); this.render();
+      if (this.solved()) celebrate("完成了！", `排回順序了，走了 ${this.moves} 步`);
+      else setStatus(`已經走了 ${this.moves} 步`, "");
+    },
+    reveal(){ this.t = this.goal.slice(); this.render(); P.done = true; setStatus("這是排好的樣子", "good"); }
+  },
+
+  missing: {
+    start(){
+      const c = {easy: [9, 1, false], mid: [12, 1, true], hard: [16, 2, true]}[st.diff];
+      this.max = c[0]; this.miss = shuffle(range(1, c[0] + 1)).slice(0, c[1]); this.found = new Set(); this.wrong = new Set();
+      this.shown = range(1, c[0] + 1).filter(v => !this.miss.includes(v)); if (c[2]) shuffle(this.shown);
+      setRule(`1 到 ${c[0]} 裡面少了 ${c[1] === 1 ? "一" : "兩"}張，是哪${c[1] === 1 ? "一" : "兩"}張？`); setBadge(null);
+      setStatus("看上面的卡，再點下面的數字回答", ""); this.render();
+    },
+    render(){
+      const cols = this.shown.length <= 8 ? 4 : 5, rows = Math.ceil(this.shown.length / cols);
+      const W = altEl.clientWidth || 600;
+      const pc = Math.min(W < 560 ? 6 : 8, this.max), prow = Math.ceil(this.max / pc);
+      const top = fitCard(cols, rows, isStage() ? 140 : 140);
+      const pad = {gap: 8, cs: Math.min((W - 8 * (pc - 1)) / pc, Math.max(46, top.cs * .8), isStage() ? 110 : 76)};
+      altEl.innerHTML = gridHTML(this.shown.map(v => acard(v, "static", `tabindex="-1" aria-hidden="false"`)).join(""), cols, top) +
+        `<div class="apad-label">少了哪一張？點下面的數字</div>` +
+        gridHTML(range(1, this.max + 1).map(v => acard(v, "small " + (this.found.has(v) ? "done" : this.wrong.has(v) ? "dim" : ""), `data-ans="${v}"`)).join(""), pc, pad, "pad");
+      altEl.querySelectorAll(".pad .card").forEach(b => b.style.fontSize = pad.cs * .48 + "px");
+      void prow;
+    },
+    tap(){},
+    answer(v, el){
+      if (this.found.has(v) || this.wrong.has(v)) return;
+      if (this.miss.includes(v)) {
+        this.found.add(v); el.classList.add("done", "pop"); sfx("line");
+        if (this.found.size === this.miss.length) celebrate("找到了！", `少的是 ${this.miss.slice().sort((a, b) => a - b).join(" 和 ")}`);
+        else setStatus(`${v} 答對了，還少一張`, "good");
+      } else {
+        this.wrong.add(v); jiggle(el); sfx("bad"); setStatus(`${v} 在上面喔，再找找看`, "warn");
+        setTimeout(() => el.classList.add("dim"), 400);
+      }
+    },
+    hint(){
+      const v = this.miss.find(x => !this.found.has(x)); if (!v) return;
+      const near = this.shown.filter(x => Math.abs(x - v) === 1);
+      setStatus(near.length ? `提示：找找看 ${near.join(" 和 ")} 旁邊的數字` : `提示：比 ${v > this.max / 2 ? "一半大" : "一半小"}`, "");
+    },
+    reveal(){ this.miss.forEach(v => this.found.add(v)); this.render(); P.done = true; setStatus(`少的是 ${this.miss.slice().sort((a, b) => a - b).join(" 和 ")}`, "good"); }
+  },
+
+  guess: {
+    start(){
+      this.max = st.diff === "easy" ? 8 : 16; this.limit = st.diff === "hard" ? 5 : 0;
+      this.secret = 1 + (Math.random() * this.max | 0); this.lo = 1; this.hi = this.max; this.count = 0; this.won = false;
+      setRule(`我藏了一張 1 到 ${this.max} 的卡，猜猜看是哪一張`); setBadge(null);
+      setStatus(this.limit ? `點一張卡來猜，最多猜 ${this.limit} 次` : "點一張卡來猜", ""); this.render();
+    },
+    render(){
+      const cols = 4, rows = this.max / cols, s = fitCard(cols, rows);
+      altEl.innerHTML = gridHTML(range(1, this.max + 1).map(v => acard(v, v === this.secret && (this.won || P.done) ? "done" : (v < this.lo || v > this.hi) ? "dim" : "")).join(""), cols, s);
+    },
+    tap(v, el){
+      if (v < this.lo || v > this.hi) return;
+      this.count++;
+      if (v === this.secret) { this.won = true; this.render(); celebrate("猜中了！", `答案是 ${v}，猜了 ${this.count} 次`); return; }
+      if (v < this.secret) this.lo = v + 1; else this.hi = v - 1;
+      sfx("back"); this.render();
+      const left = this.limit ? this.limit - this.count : null;
+      if (left === 0) { P.done = true; this.render(); setStatus(`次數用完了，答案是 ${this.secret}`, "warn"); sfx("bad"); return; }
+      setStatus(`比 ${v} ${v < this.secret ? "大" : "小"}一點` + (left ? `，還可以猜 ${left} 次` : ""), "");
+    },
+    hint(){ const mid = Math.floor((this.lo + this.hi) / 2); glow(altEl.querySelector(`[data-v="${mid}"]`)); setStatus(`範圍在 ${this.lo} 到 ${this.hi}，猜中間的 ${mid} 最快`, ""); },
+    reveal(){ P.done = true; this.render(); setStatus(`答案是 ${this.secret}`, "good"); }
+  },
+
+  pairs: {
+    start(){
+      let nums, T;
+      if (st.diff === "easy") { T = 9; nums = range(1, 9); }
+      else if (st.diff === "mid") { T = 17; nums = range(1, 17); }
+      else {
+        T = 13 + (Math.random() * 9 | 0);
+        const ps = shuffle(range(Math.max(1, T - 16), Math.ceil(T / 2)).filter(a => a !== T - a)).slice(0, 6);
+        nums = ps.flatMap(a => [a, T - a]);
+      }
+      this.T = T; this.vals = shuffle(nums); this.gone = new Set(); this.pick = null;
+      setRule("點兩張卡，加起來剛好是"); setBadge(T);
+      setStatus(`一共 ${nums.length / 2} 對，找到的會消失`, ""); this.render();
+    },
+    render(){
+      const cols = 4, rows = Math.ceil(this.vals.length / cols), s = fitCard(cols, rows);
+      altEl.innerHTML = gridHTML(this.vals.map(v => acard(v, this.gone.has(v) ? "gone" : v === this.pick ? "sel" : "")).join(""), cols, s);
+    },
+    tap(v, el){
+      if (this.gone.has(v)) return;
+      if (this.pick === null) { this.pick = v; el.classList.add("sel"); sfx("place"); setStatus(`${v}，還差 ${this.T - v}`, ""); return; }
+      if (this.pick === v) { this.pick = null; el.classList.remove("sel"); return; }
+      const a = this.pick; this.pick = null;
+      if (a + v === this.T) {
+        this.gone.add(a); this.gone.add(v); sfx("line");
+        const left = (this.vals.length - this.gone.size) / 2;
+        this.render();
+        if (!left) celebrate("全部消完了！", `${this.vals.length / 2} 對都找到了`);
+        else setStatus(`${a} + ${v} = ${this.T}，還剩 ${left} 對`, "good");
+      } else {
+        sfx("bad"); jiggle(el); jiggle(altEl.querySelector(`[data-v="${a}"]`));
+        setStatus(`${a} + ${v} = ${a + v}，不是 ${this.T}`, "warn");
+        setTimeout(() => { if (G === this) this.render(); }, 450);
+      }
+    },
+    hint(){
+      const a = this.vals.find(x => !this.gone.has(x)); if (a === undefined) return;
+      glow(altEl.querySelector(`[data-v="${a}"]`)); glow(altEl.querySelector(`[data-v="${this.T - a}"]`));
+      setStatus(`發亮的兩張是一對`, "");
+    }
+  }
+};
+
+/* ============ sound ============ */
+let AC = null;
+function ensureAudio(){ if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === "suspended") AC.resume(); }
+function tone(f, t0, dur, type, vol){
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, AC.currentTime + t0);
+  g.gain.setValueAtTime(0.0001, AC.currentTime + t0);
+  g.gain.exponentialRampToValueAtTime(vol, AC.currentTime + t0 + .015);
+  g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + t0 + dur);
+  o.connect(g).connect(AC.destination); o.start(AC.currentTime + t0); o.stop(AC.currentTime + t0 + dur + .05);
+}
+function sfx(kind){
+  if (!st.sound) return; ensureAudio(); if (!AC) return;
+  if (kind === "place") { tone(520, 0, .09, "triangle", .25); tone(780, .05, .1, "triangle", .18); }
+  if (kind === "back") tone(380, 0, .1, "triangle", .18);
+  if (kind === "line") { tone(880, 0, .14, "sine", .2); tone(1175, .09, .2, "sine", .18); }
+  if (kind === "bad") { tone(240, 0, .16, "square", .06); tone(200, .14, .2, "square", .05); }
+  if (kind === "win") [523, 659, 784, 1047, 1319].forEach((f, k) => tone(f, k * .1, .35, "triangle", .22));
+}
+
+/* ============ confetti ============ */
+function confetti(){
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cv = $("fx"), ctx = cv.getContext("2d");
+  const W = cv.width = innerWidth * devicePixelRatio, H = cv.height = innerHeight * devicePixelRatio;
+  const cols = ["#E8552D", "#F4A93C", "#028090", "#12343B", "#7CC6CF"];
+  const ps = range(0, 140).map(() => ({x: W / 2 + (Math.random() - .5) * W * .3, y: H * .45, vx: (Math.random() - .5) * 26 * devicePixelRatio, vy: (-Math.random() * 22 - 8) * devicePixelRatio,
+    s: (6 + Math.random() * 9) * devicePixelRatio, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: cols[Math.random() * cols.length | 0], num: Math.random() < .25 ? String(1 + (Math.random() * 16 | 0)) : null}));
+  let f = 0;
+  const step = () => {
+    ctx.clearRect(0, 0, W, H);
+    ps.forEach(p => {
+      p.vy += .55 * devicePixelRatio; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c;
+      if (p.num) { ctx.font = `800 ${p.s * 2.2}px "Baloo 2", sans-serif`; ctx.textAlign = "center"; ctx.fillText(p.num, 0, 0); }
+      else ctx.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .66);
+      ctx.restore();
+    });
+    if (++f < 150) requestAnimationFrame(step); else ctx.clearRect(0, 0, W, H);
+  };
+  step();
+}
+
+/* ============ setup UI ============ */
+function miniIcon(def){
+  if (def.icon) return def.icon();
+  const sh = def.id === "sum" ? sumShape(3) : def.build();
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  sh.slots.forEach(p => { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); });
+  const w = x1 - x0 + 1, h = y1 - y0 + 1, k = Math.min(60 / w, 50 / h), ox = (64 - (w - 1) * k) / 2, oy = (54 - (h - 1) * k) / 2;
+  const X = x => ox + (x - x0) * k, Y = y => oy + (y - y0) * k, c = k * .78;
+  let s = `<svg viewBox="0 0 64 54" aria-hidden="true">`;
+  sh.lines.forEach(l => { if (l.eq) return; const a = sh.slots[l.cells[0]], z = sh.slots[l.cells[l.cells.length - 1]]; s += `<line x1="${X(a.x)}" y1="${Y(a.y)}" x2="${X(z.x)}" y2="${Y(z.y)}" stroke="#F4A93C" stroke-width="${k * .22}" stroke-linecap="round"/>`; });
+  sh.slots.forEach(p => s += `<rect x="${X(p.x) - c / 2}" y="${Y(p.y) - c / 2}" width="${c}" height="${c}" rx="${c * .22}" fill="#fff" stroke="#12343B" stroke-width="1.8"/>`);
+  (sh.plus || []).forEach(p => s += `<text x="${X(p.x)}" y="${Y(p.y) + 4}" font-size="12" font-weight="800" text-anchor="middle" fill="#12343B">+</text>`);
+  return s + `</svg>`;
+}
+function buildModes(){
+  const tile = s => `<button class="mode" data-m="${s.id}" aria-pressed="${s.id === st.mode}">${miniIcon(s)}<span class="mname">${s.name}</span><span class="minfo">${s.info}</span></button>`;
+  $("modes").innerHTML = SHAPES.map(tile).join("");
+  $("modes2").innerHTML = MORE.map(tile).join("");
+  [$("modes"), $("modes2")].forEach(g => g.addEventListener("click", e => {
+    const b = e.target.closest(".mode"); if (!b) return;
+    st.mode = b.dataset.m; save(); syncSetup(); newPuzzle();
+    if (window.innerWidth < 900) $("play").scrollIntoView({behavior: "smooth", block: "start"});
+  }));
+}
+function segBind(id, key){
+  $(id).addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.disabled) return;
+    st[key] = b.dataset.v; save(); syncSetup(); newPuzzle();
+  });
+}
+function syncSetup(){
+  document.querySelectorAll(".mode").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === st.mode));
+  const segs = {diffSeg: "diff", handSeg: "hand", tgtSeg: "tgt"};
+  for (const id in segs) document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", b.dataset.v === st[segs[id]]));
+  const d = modeDef(), line = d.kind === "line";
+  $("optHand").style.display = line ? "" : "none";
+  $("optTgt").style.display = line ? "" : "none";
+  $("tgSums").style.display = line ? "" : "none";
+  $("solved").textContent = st.solved;
+  $("tgSums").setAttribute("aria-checked", st.sums);
+  $("tgSound").setAttribute("aria-checked", st.sound);
+  if (!line) { $("diffNote").textContent = d.diff[st.diff]; return; }
+  const m4 = st.mode === "magic4", isSum = st.mode === "sum";
+  document.querySelectorAll("#handSeg button").forEach(b => b.disabled = m4);
+  document.querySelectorAll("#tgtSeg button").forEach(b => b.disabled = m4);
+  const shape = currentShape(), n = shape.slots.length, hc = hintCount(n);
+  $("diffNote").textContent = isSum ? `要挑 ${SUM_K[st.diff]} 張卡` : (hc ? `先幫忙放好 ${hc} 張提示卡（共 ${n} 格）` : `${n} 格全部自己放`);
+  $("handNote").textContent = m4 ? "這個玩法一定用到 1 到 16 每一張" :
+    isSum ? {exact: "手上多 3 張用不到的牌", extra: "手上多 5 張用不到的牌", all: "1 到 16 全部放在手上，要自己挑，答案不只一種"}[st.hand] :
+    {exact: "給的牌剛好都用得到", extra: "多 3 張用不到的牌，要自己挑", all: "提示卡以外的數字全部放在手上，要自己挑，答案不只一種"}[st.hand];
+  const feas = feasibleTargets(feasKey(), shape);
+  if (m4) st.tgt = "random";
+  st.setT = nearestFeasible(st.setT, feas);
+  $("tVal").textContent = st.setT;
+  $("stepper").classList.toggle("off", st.tgt !== "set" || m4);
+  $("tgtNote").textContent = m4 ? "1 到 16 的方陣，每條線一定是 34" :
+    `這個玩法可以出 ${feas[0]} 到 ${feas[feas.length - 1]}` + (feas.length < feas[feas.length - 1] - feas[0] + 1 ? "（只有部分數字可以）" : "");
+}
+function stepTarget(dir){
+  const feas = feasibleTargets(feasKey(), currentShape());
+  const i = feas.indexOf(st.setT);
+  const j = Math.max(0, Math.min(feas.length - 1, (i < 0 ? 0 : i) + dir));
+  st.setT = feas[j]; save(); $("tVal").textContent = st.setT; newPuzzle();
+}
+function rerender(){ if (!P) return; if (P.kind === "alt") { if (G) G.render(); } else { renderBoard(); renderHand(); updateSums(false); } }
+function toggleStage(){
+  const on = !isStage();
+  document.body.classList.toggle("stage", on);
+  $("bStage").textContent = on ? "離開投影" : "投影模式";
+  try {
+    if (on && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+    if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  } catch (e) {}
+  requestAnimationFrame(rerender);
+}
+
+/* ============ init ============ */
+buildModes();
+segBind("diffSeg", "diff"); segBind("handSeg", "hand"); segBind("tgtSeg", "tgt");
+$("tMinus").onclick = () => stepTarget(-1);
+$("tPlus").onclick = () => stepTarget(1);
+$("tgSums").onclick = () => { st.sums = !st.sums; save(); syncSetup(); updateSums(false); };
+$("tgSound").onclick = () => { st.sound = !st.sound; save(); syncSetup(); };
+$("bNext").onclick = () => { ensureAudio(); newPuzzle(); };
+$("wNext").onclick = () => { ensureAudio(); newPuzzle(); };
+$("wStay").onclick = hideWin;
+$("bClear").onclick = clearBoard;
+$("bHint").onclick = () => { ensureAudio(); if (P.done) return; if (P.kind === "alt") { if (G && G.hint) G.hint(); } else giveHint(); };
+$("bReveal").onclick = () => { if (P.done) return; if (P.kind === "alt") { if (G && G.reveal) G.reveal(); } else reveal(); };
+$("bGo").onclick = () => { ensureAudio(); memoryHide(); };
+$("bStage").onclick = toggleStage;
+document.addEventListener("fullscreenchange", () => setTimeout(rerender, 120));
+let rT; window.addEventListener("resize", () => { clearTimeout(rT); rT = setTimeout(rerender, 120); });
+window.addEventListener("orientationchange", () => setTimeout(rerender, 300));
+syncSetup();
+newPuzzle();
+})();
+</script>
+</body>
+</html>
