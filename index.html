@@ -179,31 +179,6 @@ body.stage .task .rule{font-size:clamp(24px,3.4vw,40px)}
 body.stage .target{font-size:clamp(46px,7vw,84px)}
 
 
-/* ---------- more games ---------- */
-.setup h2+.modes{margin-bottom:16px}
-#alt{display:flex;flex-direction:column;align-items:center;gap:14px;margin:8px 0 6px}
-body:not([data-kind="alt"]) #alt{display:none}
-body[data-kind="alt"] #boardWrap,body[data-kind="alt"] #handLabel,body[data-kind="alt"] #hand,body[data-kind="alt"] #bClear{display:none}
-.agrid{display:grid;justify-content:center}
-.agrid .card{width:var(--cs);height:var(--cs);font-size:calc(var(--cs)*.52);padding:0;cursor:pointer}
-.agrid .card.static{cursor:default}
-.card.done{background:var(--teal);border-color:var(--teal-dark);color:#fff;box-shadow:0 5px 0 var(--teal-dark)}
-.card.inplace{background:var(--teal-soft)}
-.card.dim{opacity:.2;cursor:default}
-.card.gone{visibility:hidden}
-.card.shake{animation:cshake .4s ease-in-out}
-@keyframes cshake{25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
-.card.wanted{animation:glow .9s ease-in-out 3}
-@keyframes glow{50%{background:var(--amber);transform:scale(1.08)}}
-.aslot{width:var(--cs);height:var(--cs);border:3px dashed var(--slot);border-radius:18%;background:rgba(2,128,144,.05)}
-.apad-label{font-weight:900;font-size:clamp(17px,2.2vw,22px);color:var(--muted)}
-.box{position:absolute;border:3px solid var(--ink);border-radius:22px;background:var(--panel)}
-.box .bl{position:absolute;left:0;right:0;top:0;transform:translateY(-55%);text-align:center}
-.box .bl span{display:inline-block;background:var(--amber);color:var(--ink);border:3px solid var(--ink);border-radius:12px;padding:.05em .6em;font-weight:900;line-height:1.4;white-space:nowrap}
-.slot .tag{font-family:var(--num);font-weight:800;color:var(--slot)}
-.slot.tagged::after{display:none}
-body.stage #alt{flex:1;min-height:0;justify-content:center;margin:0}
-
 @media (max-width:560px){
   .wrap{padding:12px 10px 32px}
   .setup{padding:14px 12px}
@@ -234,10 +209,8 @@ body.stage #alt{flex:1;min-height:0;justify-content:center;margin:0}
   </header>
 
   <section class="setup" aria-label="出題設定">
-    <h2>加總挑戰</h2>
+    <h2>選一個玩法</h2>
     <div class="modes" id="modes"></div>
-    <h2>更多玩法</h2>
-    <div class="modes" id="modes2"></div>
     <div class="opts">
       <div class="opt">
         <label class="ol">難度</label>
@@ -277,11 +250,9 @@ body.stage #alt{flex:1;min-height:0;justify-content:center;margin:0}
     <div class="task"><span class="rule" id="ruleText"></span><span class="target" id="targetBadge">25</span></div>
     <div class="status" id="status" aria-live="polite"></div>
     <div class="board-wrap" id="boardWrap"><div class="board" id="board"></div></div>
-    <div id="alt"></div>
     <div class="hand-label" id="handLabel">手上的數字卡（點一張，再點格子；也可以直接拖曳）</div>
     <div class="hand" id="hand"></div>
     <div class="actions">
-      <button class="btn primary" id="bGo" style="display:none">我記好了</button>
       <button class="btn primary" id="bNext">下一題</button>
       <button class="btn" id="bClear">全部收回</button>
       <button class="btn" id="bHint">給我一張提示</button>
@@ -301,7 +272,7 @@ body.stage #alt{flex:1;min-height:0;justify-content:center;margin:0}
   <details class="tips">
     <summary>帶領小撇步</summary>
     <p id="tipText"></p>
-    <p>加總挑戰的手牌選「剩下全部」時，答案不只一種；只要每條線都對，系統就算完成。按「看答案」顯示的是其中一種排法，可以請大家比比看自己的排法哪裡不一樣。</p>
+    <p>手牌選「剩下全部」時，答案不只一種；只要每條線都對，系統就算完成。按「看答案」顯示的是其中一種排法，可以請大家比比看自己的排法哪裡不一樣。</p>
     <p>投影時按「投影模式」，畫面只留題目、格子和手牌，字會放到最大；再按一次「離開投影」回到設定。</p>
   </details>
   <footer>愛迪樂健康促進團隊</footer>
@@ -473,53 +444,8 @@ function feasibleTargets(key, shape){
   return (feasCache[key] = list);
 }
 
-/* ============ more games: definitions ============ */
-const ICON = {
-  sq: (x, y, s, t, fill, dash) => `<rect x="${x}" y="${y}" width="${s}" height="${s}" rx="${s * .22}" fill="${fill || "#fff"}" stroke="${dash ? "#9CC4CA" : "#12343B"}" stroke-width="1.8"${dash ? ' stroke-dasharray="3 2"' : ""}/>` + (t ? `<text x="${x + s / 2}" y="${y + s * .74}" font-size="${s * .62}" font-weight="800" text-anchor="middle" fill="${fill && fill !== "#fff" ? "#fff" : "#12343B"}" font-family="sans-serif">${t}</text>` : ""),
-  wrap: s => `<svg viewBox="0 0 64 54" aria-hidden="true">${s}</svg>`
-};
-function gridIcon(vals, opts = {}){
-  let s = ""; const z = 15, g = 2, ox = 32 - (3 * z + 2 * g) / 2, oy = 27 - (3 * z + 2 * g) / 2;
-  vals.forEach((v, k) => { const x = ox + (k % 3) * (z + g), y = oy + Math.floor(k / 3) * (z + g);
-    s += v === 0 ? ICON.sq(x, y, z, "", "none", true) : ICON.sq(x, y, z, v === "?" ? "?" : String(v), (opts.teal || []).includes(k) ? "#028090" : "#fff"); });
-  return ICON.wrap(s);
-}
-const MORE = [
-  {id: "schulte", kind: "alt", name: "找數字方格", info: "依序點 1 到 16",
-    icon: () => gridIcon([7, 2, 5, 1, 9, 4, 6, 3, 8], {teal: [3, 1]}),
-    diff: {easy: "3×3，從 1 點到 9", mid: "4×4，從 1 點到 16", hard: "4×4，從 16 倒著點到 1"},
-    tip: "練注意力與搜尋速度。團體時可以請大家一起喊出下一個數字，由一位代表上台點；也可以比比看第二次有沒有比第一次快。"},
-  {id: "slide", kind: "alt", name: "數字華容道", info: "滑動排回順序",
-    icon: () => gridIcon([1, 2, 3, 4, 6, 0, 7, 5, 8]),
-    diff: {easy: "3×3，只打亂幾步", mid: "3×3，打亂比較多", hard: "4×4，1 到 15"},
-    tip: "練計畫與空間推理。點空格同一排或同一直行的卡，中間的卡會一起滑過去。卡住時，先把第一排排好，再處理下面。"},
-  {id: "memory", kind: "place", name: "看一眼再排回去", info: "記住位置再排回",
-    icon: () => gridIcon([0, 8, 0, 3, 0, 0, 0, 0, 12], {teal: [1, 3, 8]}),
-    diff: {easy: "記 3 張卡", mid: "記 5 張卡", hard: "記 7 張卡"},
-    tip: "練視覺記憶。看的時候可以請學員把位置說出來，例如「8 在最上面中間」，用說的會記得更牢。"},
-  {id: "sort", kind: "place", name: "排排隊", info: "依照大小排好",
-    icon: () => ICON.wrap(ICON.sq(2, 20, 13, "2") + ICON.sq(17, 20, 13, "5") + ICON.sq(32, 20, 13, "9") + ICON.sq(47, 20, 13, "", "none", true) + `<path d="M6 42 H56 M50 37 L56 42 L50 47" stroke="#F4A93C" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`),
-    diff: {easy: "5 張，由小到大", mid: "8 張，由小到大或由大到小", hard: "只挑單數或雙數來排"},
-    tip: "練數序與比較大小。困難版手上會混著用不到的卡，要先挑出符合規則的卡再排。"},
-  {id: "classify", kind: "place", name: "分一分", info: "放進對的籃子",
-    icon: () => ICON.wrap(`<rect x="2" y="10" width="27" height="38" rx="7" fill="#F3F8F9" stroke="#12343B" stroke-width="1.8"/><rect x="35" y="10" width="27" height="38" rx="7" fill="#F3F8F9" stroke="#12343B" stroke-width="1.8"/>` + ICON.sq(8, 16, 13, "3") + ICON.sq(8, 31, 13, "7") + ICON.sq(42, 16, 13, "4") + ICON.sq(42, 31, 13, "", "none", true)),
-    diff: {easy: "單數、雙數", mid: "大於 8、8 或更小", hard: "3 的倍數、不是 3 的倍數"},
-    tip: "練分類與規則判斷。每個籃子的格子數就是那一類的張數，放不下時就代表有卡放錯了。"},
-  {id: "missing", kind: "alt", name: "缺了哪一張", info: "找出不見的數字",
-    icon: () => ICON.wrap(ICON.sq(2, 20, 13, "1") + ICON.sq(17, 20, 13, "2") + ICON.sq(32, 20, 13, "", "none", true) + ICON.sq(47, 20, 13, "4")),
-    diff: {easy: "1 到 9，照順序，少 1 張", mid: "1 到 12，打亂，少 1 張", hard: "1 到 16，打亂，少 2 張"},
-    tip: "練注意力與數序。可以先請學員說說找的方法，例如從小到大一張一張點名，比亂找更快也更準。"},
-  {id: "guess", kind: "alt", name: "猜數字", info: "大一點還是小一點",
-    icon: () => ICON.wrap(ICON.sq(18, 8, 28, "?") + `<text x="7" y="32" font-size="16" font-weight="800" fill="#F4A93C" font-family="sans-serif">‹</text><text x="51" y="32" font-size="16" font-weight="800" fill="#F4A93C" font-family="sans-serif">›</text>`),
-    diff: {easy: "1 到 8", mid: "1 到 16", hard: "1 到 16，最多猜 5 次"},
-    tip: "練推理與策略。玩幾次後可以問大家：猜哪一張最快縮小範圍？每次猜中間那張，16 張最多 5 次一定猜得到。"},
-  {id: "pairs", kind: "alt", name: "湊對消除", info: "兩張湊成目標",
-    icon: () => ICON.wrap(ICON.sq(6, 16, 20, "8", "#F4A93C") + ICON.sq(38, 16, 20, "9", "#F4A93C") + `<path d="M16 14 Q32 0 48 14" stroke="#028090" stroke-width="2.5" fill="none" stroke-linecap="round"/>`),
-    diff: {easy: "1 到 8，兩張湊成 9", mid: "1 到 16，兩張湊成 17", hard: "目標隨機，6 對"},
-    tip: "練心算與配對。先點一張，再想「還差多少」去找另一張；找到的一對會消失，畫面越來越乾淨。"}
-];
 SHAPES.forEach(s => s.kind = "line");
-const ALLMODES = SHAPES.concat(MORE);
+const ALLMODES = SHAPES;
 
 /* ============ state ============ */
 const st = {mode: "sq3", diff: "easy", hand: "exact", tgt: "random", setT: 25, sums: true, sound: true, solved: 0};
@@ -551,7 +477,6 @@ function setBadge(v){ const b = $("targetBadge"); if (v === null || v === undefi
 function setStatus(t, cls){ const s = $("status"); s.textContent = t; s.className = "status" + (cls ? " " + cls : ""); }
 function setButtons(o){
   $("bHint").disabled = !o.hint; $("bReveal").disabled = !o.reveal;
-  const go = $("bGo"); go.style.display = o.go ? "" : "none"; if (o.go) go.textContent = o.go;
 }
 
 /* ============ new round dispatcher ============ */
@@ -561,8 +486,6 @@ function newPuzzle(){
   document.body.dataset.kind = d.kind;
   $("tipText").textContent = d.tip;
   if (d.kind === "line") { newLinePuzzle(); setButtons({hint: 1, reveal: 1}); }
-  else if (d.kind === "place") PLACE[d.id]();
-  else { P = {kind: "alt", done: false}; G = ALT[d.id]; setButtons({hint: !!G.hint, reveal: !!G.reveal}); G.start(); }
 }
 function newLinePuzzle(){
   const shape = currentShape();
@@ -602,86 +525,6 @@ function nearestFeasible(t, feas){
   return best;
 }
 
-/* ============ placement games (use the card-placing engine) ============ */
-function placePuzzle(o){
-  P = Object.assign({kind: "place", fixed: new Set(), revealed: new Set(), done: false, prevOk: new Set(), locked: false, keepOrder: false}, o);
-  setButtons({hint: 1, reveal: 1, go: o.go});
-  renderAll();
-}
-const PLACE = {
-  memory(){
-    const n = {easy: 3, mid: 5, hard: 7}[st.diff], secs = {easy: 10, mid: 12, hard: 15}[st.diff];
-    const slots = []; for (let y = 0; y < 3; y++) for (let x = 0; x < 3; x++) slots.push({x: x * 1.1, y: y * 1.1});
-    const nums = shuffle(ALL16.slice()).slice(0, n), pos = shuffle(range(0, 9)).slice(0, n);
-    const sol = new Array(9).fill(0); pos.forEach((p, k) => sol[p] = nums[k]);
-    placePuzzle({shape: {slots, lines: []}, sol, board: sol.slice(), hand: [], need: n, locked: true, go: "我記好了",
-      evalBad: () => range(0, 9).filter(i => P.board[i] && P.board[i] !== P.sol[i]),
-      winText: () => `${n} 張卡都回到原來的位置`, badMsg: k => `有 ${k} 張放錯位置，再想想看`, revealMsg: "這是剛才的位置"});
-    setRule(`記住這 ${n} 張卡放在哪裡`); setBadge(null);
-    let left = secs;
-    const tick = () => setStatus(`還有 ${left} 秒，看好了就按「我記好了」`, "");
-    tick();
-    timers.push(setInterval(() => { left--; if (left <= 0) memoryHide(); else tick(); }, 1000));
-  },
-  sort(){
-    let hand, need, asc = Math.random() < .5, rule;
-    if (st.diff === "easy") { asc = true; hand = shuffle(ALL16.slice()).slice(0, 5); need = hand.slice(); rule = "由小到大排好"; }
-    else if (st.diff === "mid") { hand = shuffle(ALL16.slice()).slice(0, 8); need = hand.slice(); rule = asc ? "由小到大排好" : "由大到小排好"; }
-    else {
-      const odd = Math.random() < .5;
-      do { hand = shuffle(ALL16.slice()).slice(0, 9); need = hand.filter(v => (v % 2 === 1) === odd); } while (need.length < 4 || need.length > 6);
-      rule = `只挑${odd ? "單數" : "雙數"}，${asc ? "由小到大" : "由大到小"}排好`;
-    }
-    const k = need.length, sol = need.slice().sort((a, b) => asc ? a - b : b - a);
-    const per = k <= 5 ? k : Math.ceil(k / 2);
-    const slots = range(0, k).map(i => ({x: (i % per) * 1.14, y: Math.floor(i / per) * 1.3}));
-    placePuzzle({shape: {slots, lines: [], tags: range(1, k + 1).map(String)}, sol, board: new Array(k).fill(0), hand: shuffle(hand.slice()), need: k, keepOrder: true,
-      evalBad: () => range(0, k).filter(i => P.board[i] !== P.sol[i]),
-      winText: () => sol.join(asc ? " < " : " > "), badMsg: c => `有 ${c} 張的位置不對，再比比看大小`, revealMsg: "這是正確的順序"});
-    setRule(rule); setBadge(null);
-    setStatus("照格子上的號碼，從第 1 格開始放", "");
-  },
-  classify(){
-    const R = {
-      easy: [["單數", v => v % 2 === 1], ["雙數", v => v % 2 === 0], 6],
-      mid: [["大於 8", v => v > 8], ["8 或更小", v => v <= 8], 8],
-      hard: [["3 的倍數", v => v % 3 === 0], ["不是 3 的倍數", v => v % 3 !== 0], 8]
-    }[st.diff];
-    let cards, A, B;
-    do { cards = shuffle(ALL16.slice()).slice(0, R[2]); A = cards.filter(R[0][1]).sort((a, b) => a - b); B = cards.filter(R[1][1]).sort((a, b) => a - b); } while (A.length < 2 || B.length < 2);
-    const rows = Math.ceil(Math.max(A.length, B.length) / 2), slots = [], group = [];
-    A.forEach((v, i) => { slots.push({x: (i % 2) * 1.1, y: Math.floor(i / 2) * 1.1}); group.push(0); });
-    B.forEach((v, i) => { slots.push({x: 3.3 + (i % 2) * 1.1, y: Math.floor(i / 2) * 1.1}); group.push(1); });
-    const boxH = (rows - 1) * 1.1;
-    const boxes = [{x0: -.68, y0: -.95, x1: 1.78, y1: boxH + .68, label: R[0][0]}, {x0: 2.62, y0: -.95, x1: 5.08, y1: boxH + .68, label: R[1][0]}];
-    const sol = A.concat(B), fns = [R[0][1], R[1][1]];
-    placePuzzle({shape: {slots, lines: [], boxes}, sol, board: new Array(sol.length).fill(0), hand: cards.slice().sort((a, b) => a - b), need: sol.length,
-      evalBad: () => range(0, sol.length).filter(i => P.board[i] && !fns[group[i]](P.board[i])),
-      winText: () => "每張卡都放進對的籃子", badMsg: c => `有 ${c} 張放錯籃子，再檢查看看`, revealMsg: "這是正確的分法",
-      hintFn: () => {
-        const wrong = range(0, sol.length).find(i => P.board[i] && !P.fixed.has(i) && !fns[group[i]](P.board[i]));
-        if (wrong !== undefined) { P.hand.push(P.board[wrong]); P.board[wrong] = 0; sortHand(); return "有一張放錯了，已經收回手上"; }
-        const v = P.hand[0]; if (v === undefined) return null;
-        const g = fns[0](v) ? 0 : 1;
-        const i = range(0, sol.length).find(k => group[k] === g && !P.board[k]);
-        if (i === undefined) return null;
-        P.hand = P.hand.filter(x => x !== v); P.board[i] = v; P.fixed.add(i); lastPlaced = i;
-        return `${v} 應該放在「${boxes[g].label}」`;
-      }});
-    setRule("把每張卡放進對的籃子"); setBadge(null);
-    setStatus(`左邊是「${R[0][0]}」，右邊是「${R[1][0]}」`, "");
-  }
-};
-function memoryHide(){
-  if (!P || P.kind !== "place" || !P.locked) return;
-  stopTimers();
-  P.hand = P.board.filter(v => v).sort((a, b) => a - b);
-  P.board = P.board.map(() => 0); P.locked = false;
-  setButtons({hint: 1, reveal: 1});
-  setRule("把卡片放回剛才的位置");
-  setStatus("點一張卡，再點它原本的格子", "");
-  sfx("back"); renderAll();
-}
 const sortHand = () => { if (!P.keepOrder) P.hand.sort((a, b) => a - b); };
 
 /* ============ engine rendering ============ */
@@ -960,195 +803,6 @@ document.addEventListener("keydown", e => {
   }
 });
 
-/* ============ alt games (tap-only grids) ============ */
-const altEl = $("alt");
-function fitCard(cols, rows, reserve){
-  const W = altEl.clientWidth || 600, gap = Math.max(8, Math.min(16, W / 50));
-  const H = (isStage() ? altEl.clientHeight : Math.min(window.innerHeight * 0.62, 600)) - (reserve || 0);
-  const cap = isStage() ? 210 : 96;
-  const cs = Math.max(40, Math.min((W - gap * (cols - 1)) / cols, (H - gap * (rows - 1)) / rows, cap));
-  return {cs, gap};
-}
-function gridHTML(items, cols, size, extraCls){
-  return `<div class="agrid ${extraCls || ""}" style="grid-template-columns:repeat(${cols},${size.cs}px);gap:${size.gap}px;--cs:${size.cs}px">${items}</div>`;
-}
-const acard = (v, cls, attr) => `<button class="card ${cls || ""}" ${attr || `data-v="${v}"`} aria-label="數字 ${v}"><span>${v}</span></button>`;
-function jiggle(el){ if (!el) return; el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
-function glow(el){ if (!el) return; el.classList.remove("wanted"); void el.offsetWidth; el.classList.add("wanted"); }
-altEl.addEventListener("click", e => {
-  ensureAudio();
-  const b = e.target.closest("[data-v],[data-ans]");
-  if (!b || !G || P.done) return;
-  if (b.dataset.ans) G.answer(+b.dataset.ans, b); else G.tap(+b.dataset.v, b);
-});
-
-const ALT = {
-  schulte: {
-    start(){
-      this.n = st.diff === "easy" ? 3 : 4; this.N = this.n * this.n;
-      this.vals = shuffle(range(1, this.N + 1)); this.desc = st.diff === "hard";
-      this.next = this.desc ? this.N : 1; this.t0 = 0; this.hit = new Set();
-      setRule(this.desc ? `從 ${this.N} 倒著點到 1，下一個是` : `從 1 依序點到 ${this.N}，下一個是`);
-      setBadge(this.next); setStatus("點下第一張就開始計時", ""); this.render();
-    },
-    render(){
-      const s = fitCard(this.n, this.n);
-      altEl.innerHTML = gridHTML(this.vals.map(v => acard(v, this.hit.has(v) ? "done" : "")).join(""), this.n, s);
-    },
-    tap(v, el){
-      if (this.hit.has(v)) return;
-      if (v !== this.next) { jiggle(el); sfx("bad"); return; }
-      if (!this.t0) { this.t0 = performance.now(); timers.push(setInterval(() => setStatus(`已經 ${((performance.now() - this.t0) / 1000).toFixed(1)} 秒`, ""), 100)); }
-      this.hit.add(v); el.classList.add("done", "pop"); sfx("place");
-      this.next += this.desc ? -1 : 1;
-      if (this.hit.size === this.N) { stopTimers(); const t = ((performance.now() - this.t0) / 1000).toFixed(1); setBadge("✓"); celebrate("完成了！", `${this.N} 張全部找到，花了 ${t} 秒`); }
-      else setBadge(this.next);
-    },
-    hint(){ glow(altEl.querySelector(`[data-v="${this.next}"]`)); setStatus(`${this.next} 在發亮的地方`, ""); }
-  },
-
-  slide: {
-    start(){
-      this.n = st.diff === "hard" ? 4 : 3; const N = this.n * this.n;
-      this.goal = range(1, N).concat([0]); this.t = this.goal.slice(); this.moves = 0;
-      const steps = {easy: 14, mid: 70, hard: 160}[st.diff]; let prev = -1;
-      do {
-        this.t = this.goal.slice(); prev = -1;
-        for (let k = 0; k < steps; k++) {
-          const e = this.t.indexOf(0), nb = this.nbrs(e).filter(x => x !== prev), p = nb[Math.random() * nb.length | 0];
-          [this.t[e], this.t[p]] = [this.t[p], this.t[e]]; prev = e;
-        }
-      } while (this.solved());
-      setRule(`把數字排回 1 到 ${N - 1} 的順序，空格留在最後`); setBadge(null);
-      setStatus("點空格同一排或同一直行的卡，卡就會滑過去", ""); this.render();
-    },
-    nbrs(i){ const n = this.n, x = i % n, y = Math.floor(i / n), r = []; if (x > 0) r.push(i - 1); if (x < n - 1) r.push(i + 1); if (y > 0) r.push(i - n); if (y < n - 1) r.push(i + n); return r; },
-    solved(){ return this.t.every((v, i) => v === this.goal[i]); },
-    render(){
-      const s = fitCard(this.n, this.n);
-      altEl.innerHTML = gridHTML(this.t.map((v, i) => v ? acard(v, v === i + 1 ? "inplace" : "") : `<div class="aslot"></div>`).join(""), this.n, s);
-    },
-    tap(v, el){
-      const n = this.n, i = this.t.indexOf(v), e = this.t.indexOf(0);
-      const sameRow = Math.floor(i / n) === Math.floor(e / n), sameCol = i % n === e % n;
-      if (!sameRow && !sameCol) { jiggle(el); sfx("bad"); return; }
-      const step = sameRow ? (i > e ? 1 : -1) : (i > e ? n : -n);
-      let cur = e; while (cur !== i) { this.t[cur] = this.t[cur + step]; cur += step; } this.t[i] = 0;
-      this.moves++; sfx("place"); this.render();
-      if (this.solved()) celebrate("完成了！", `排回順序了，走了 ${this.moves} 步`);
-      else setStatus(`已經走了 ${this.moves} 步`, "");
-    },
-    reveal(){ this.t = this.goal.slice(); this.render(); P.done = true; setStatus("這是排好的樣子", "good"); }
-  },
-
-  missing: {
-    start(){
-      const c = {easy: [9, 1, false], mid: [12, 1, true], hard: [16, 2, true]}[st.diff];
-      this.max = c[0]; this.miss = shuffle(range(1, c[0] + 1)).slice(0, c[1]); this.found = new Set(); this.wrong = new Set();
-      this.shown = range(1, c[0] + 1).filter(v => !this.miss.includes(v)); if (c[2]) shuffle(this.shown);
-      setRule(`1 到 ${c[0]} 裡面少了 ${c[1] === 1 ? "一" : "兩"}張，是哪${c[1] === 1 ? "一" : "兩"}張？`); setBadge(null);
-      setStatus("看上面的卡，再點下面的數字回答", ""); this.render();
-    },
-    render(){
-      const cols = this.shown.length <= 8 ? 4 : 5, rows = Math.ceil(this.shown.length / cols);
-      const W = altEl.clientWidth || 600;
-      const pc = Math.min(W < 560 ? 6 : 8, this.max), prow = Math.ceil(this.max / pc);
-      const top = fitCard(cols, rows, isStage() ? 140 : 140);
-      const pad = {gap: 8, cs: Math.min((W - 8 * (pc - 1)) / pc, Math.max(46, top.cs * .8), isStage() ? 110 : 76)};
-      altEl.innerHTML = gridHTML(this.shown.map(v => acard(v, "static", `tabindex="-1" aria-hidden="false"`)).join(""), cols, top) +
-        `<div class="apad-label">少了哪一張？點下面的數字</div>` +
-        gridHTML(range(1, this.max + 1).map(v => acard(v, "small " + (this.found.has(v) ? "done" : this.wrong.has(v) ? "dim" : ""), `data-ans="${v}"`)).join(""), pc, pad, "pad");
-      altEl.querySelectorAll(".pad .card").forEach(b => b.style.fontSize = pad.cs * .48 + "px");
-      void prow;
-    },
-    tap(){},
-    answer(v, el){
-      if (this.found.has(v) || this.wrong.has(v)) return;
-      if (this.miss.includes(v)) {
-        this.found.add(v); el.classList.add("done", "pop"); sfx("line");
-        if (this.found.size === this.miss.length) celebrate("找到了！", `少的是 ${this.miss.slice().sort((a, b) => a - b).join(" 和 ")}`);
-        else setStatus(`${v} 答對了，還少一張`, "good");
-      } else {
-        this.wrong.add(v); jiggle(el); sfx("bad"); setStatus(`${v} 在上面喔，再找找看`, "warn");
-        setTimeout(() => el.classList.add("dim"), 400);
-      }
-    },
-    hint(){
-      const v = this.miss.find(x => !this.found.has(x)); if (!v) return;
-      const near = this.shown.filter(x => Math.abs(x - v) === 1);
-      setStatus(near.length ? `提示：找找看 ${near.join(" 和 ")} 旁邊的數字` : `提示：比 ${v > this.max / 2 ? "一半大" : "一半小"}`, "");
-    },
-    reveal(){ this.miss.forEach(v => this.found.add(v)); this.render(); P.done = true; setStatus(`少的是 ${this.miss.slice().sort((a, b) => a - b).join(" 和 ")}`, "good"); }
-  },
-
-  guess: {
-    start(){
-      this.max = st.diff === "easy" ? 8 : 16; this.limit = st.diff === "hard" ? 5 : 0;
-      this.secret = 1 + (Math.random() * this.max | 0); this.lo = 1; this.hi = this.max; this.count = 0; this.won = false;
-      setRule(`我藏了一張 1 到 ${this.max} 的卡，猜猜看是哪一張`); setBadge(null);
-      setStatus(this.limit ? `點一張卡來猜，最多猜 ${this.limit} 次` : "點一張卡來猜", ""); this.render();
-    },
-    render(){
-      const cols = 4, rows = this.max / cols, s = fitCard(cols, rows);
-      altEl.innerHTML = gridHTML(range(1, this.max + 1).map(v => acard(v, v === this.secret && (this.won || P.done) ? "done" : (v < this.lo || v > this.hi) ? "dim" : "")).join(""), cols, s);
-    },
-    tap(v, el){
-      if (v < this.lo || v > this.hi) return;
-      this.count++;
-      if (v === this.secret) { this.won = true; this.render(); celebrate("猜中了！", `答案是 ${v}，猜了 ${this.count} 次`); return; }
-      if (v < this.secret) this.lo = v + 1; else this.hi = v - 1;
-      sfx("back"); this.render();
-      const left = this.limit ? this.limit - this.count : null;
-      if (left === 0) { P.done = true; this.render(); setStatus(`次數用完了，答案是 ${this.secret}`, "warn"); sfx("bad"); return; }
-      setStatus(`比 ${v} ${v < this.secret ? "大" : "小"}一點` + (left ? `，還可以猜 ${left} 次` : ""), "");
-    },
-    hint(){ const mid = Math.floor((this.lo + this.hi) / 2); glow(altEl.querySelector(`[data-v="${mid}"]`)); setStatus(`範圍在 ${this.lo} 到 ${this.hi}，猜中間的 ${mid} 最快`, ""); },
-    reveal(){ P.done = true; this.render(); setStatus(`答案是 ${this.secret}`, "good"); }
-  },
-
-  pairs: {
-    start(){
-      let nums, T;
-      if (st.diff === "easy") { T = 9; nums = range(1, 9); }
-      else if (st.diff === "mid") { T = 17; nums = range(1, 17); }
-      else {
-        T = 13 + (Math.random() * 9 | 0);
-        const ps = shuffle(range(Math.max(1, T - 16), Math.ceil(T / 2)).filter(a => a !== T - a)).slice(0, 6);
-        nums = ps.flatMap(a => [a, T - a]);
-      }
-      this.T = T; this.vals = shuffle(nums); this.gone = new Set(); this.pick = null;
-      setRule("點兩張卡，加起來剛好是"); setBadge(T);
-      setStatus(`一共 ${nums.length / 2} 對，找到的會消失`, ""); this.render();
-    },
-    render(){
-      const cols = 4, rows = Math.ceil(this.vals.length / cols), s = fitCard(cols, rows);
-      altEl.innerHTML = gridHTML(this.vals.map(v => acard(v, this.gone.has(v) ? "gone" : v === this.pick ? "sel" : "")).join(""), cols, s);
-    },
-    tap(v, el){
-      if (this.gone.has(v)) return;
-      if (this.pick === null) { this.pick = v; el.classList.add("sel"); sfx("place"); setStatus(`${v}，還差 ${this.T - v}`, ""); return; }
-      if (this.pick === v) { this.pick = null; el.classList.remove("sel"); return; }
-      const a = this.pick; this.pick = null;
-      if (a + v === this.T) {
-        this.gone.add(a); this.gone.add(v); sfx("line");
-        const left = (this.vals.length - this.gone.size) / 2;
-        this.render();
-        if (!left) celebrate("全部消完了！", `${this.vals.length / 2} 對都找到了`);
-        else setStatus(`${a} + ${v} = ${this.T}，還剩 ${left} 對`, "good");
-      } else {
-        sfx("bad"); jiggle(el); jiggle(altEl.querySelector(`[data-v="${a}"]`));
-        setStatus(`${a} + ${v} = ${a + v}，不是 ${this.T}`, "warn");
-        setTimeout(() => { if (G === this) this.render(); }, 450);
-      }
-    },
-    hint(){
-      const a = this.vals.find(x => !this.gone.has(x)); if (a === undefined) return;
-      glow(altEl.querySelector(`[data-v="${a}"]`)); glow(altEl.querySelector(`[data-v="${this.T - a}"]`));
-      setStatus(`發亮的兩張是一對`, "");
-    }
-  }
-};
-
 /* ============ sound ============ */
 let AC = null;
 function ensureAudio(){ if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === "suspended") AC.resume(); }
@@ -1209,8 +863,7 @@ function miniIcon(def){
 function buildModes(){
   const tile = s => `<button class="mode" data-m="${s.id}" aria-pressed="${s.id === st.mode}">${miniIcon(s)}<span class="mname">${s.name}</span><span class="minfo">${s.info}</span></button>`;
   $("modes").innerHTML = SHAPES.map(tile).join("");
-  $("modes2").innerHTML = MORE.map(tile).join("");
-  [$("modes"), $("modes2")].forEach(g => g.addEventListener("click", e => {
+  [$("modes")].forEach(g => g.addEventListener("click", e => {
     const b = e.target.closest(".mode"); if (!b) return;
     st.mode = b.dataset.m; save(); syncSetup(); newPuzzle();
     if (window.innerWidth < 900) $("play").scrollIntoView({behavior: "smooth", block: "start"});
@@ -1279,9 +932,8 @@ $("bNext").onclick = () => { ensureAudio(); newPuzzle(); };
 $("wNext").onclick = () => { ensureAudio(); newPuzzle(); };
 $("wStay").onclick = hideWin;
 $("bClear").onclick = clearBoard;
-$("bHint").onclick = () => { ensureAudio(); if (P.done) return; if (P.kind === "alt") { if (G && G.hint) G.hint(); } else giveHint(); };
-$("bReveal").onclick = () => { if (P.done) return; if (P.kind === "alt") { if (G && G.reveal) G.reveal(); } else reveal(); };
-$("bGo").onclick = () => { ensureAudio(); memoryHide(); };
+$("bHint").onclick = () => { ensureAudio(); if (P.done) return; giveHint(); };
+$("bReveal").onclick = () => { if (P.done) return; reveal(); };
 $("bStage").onclick = toggleStage;
 document.addEventListener("fullscreenchange", () => setTimeout(rerender, 120));
 let rT; window.addEventListener("resize", () => { clearTimeout(rT); rT = setTimeout(rerender, 120); });
